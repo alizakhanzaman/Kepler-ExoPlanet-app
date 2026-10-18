@@ -1,0 +1,54 @@
+<main class="shell">
+  <header>
+    <h1>Kepler Exoplanet Classifier</h1>
+    <p>Teaching prototype &bull; CONFIRMED planet vs FALSE POSITIVE (Kepler KOI data)</p>
+  </header>
+
+  @if (deployedStatic) {
+    <aside class="notice">Static GitHub Pages demonstration only.
+      Predictions require Flask and Angular running locally.</aside>
+  }
+
+  <form (ngSubmit)="submit()">
+    <h2>Model input features ({{ fields.length }})</h2>
+    <p class="hint">Leave a field blank if unknown; the model fills it with the training median.</p>
+    <div class="grid">
+      @for (field of fields; track field.name) {
+        <label>{{ field.label }}
+          @if (field.kind === 'number') {
+            <input type="number" step="any" [name]="field.name"
+                   [min]="field.min ?? null" [max]="field.max ?? null"
+                   [(ngModel)]="values[field.name]" [required]="field.required" />
+          } @else {
+            <select [name]="field.name" [(ngModel)]="values[field.name]"
+                    [required]="field.required">
+              <option [ngValue]="null">Select a value</option>
+              @for (option of field.options ?? []; track option) {
+                <option [ngValue]="option">{{ option }}</option>
+              }
+            </select>
+          }
+        </label>
+      }
+    </div>
+    <div class="actions">
+      <button type="submit" [disabled]="loading() || deployedStatic">
+        {{ loading() ? 'Predicting...' : 'Run local prediction' }}
+      </button>
+      <button type="button" class="secondary" (click)="fillExample()">Fill example</button>
+    </div>
+  </form>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (result(); as r) {
+    <section class="result">
+      <h2>Prediction result</h2>
+      <p class="label"><strong>{{ r.prediction }}</strong></p>
+      <p>Probability of CONFIRMED: {{ (r.confirmed_probability * 100).toFixed(1) }}%</p>
+      <p class="hint">{{ r.disclaimer }}</p>
+    </section>
+  }
+</main>

@@ -1,0 +1,24 @@
+# Python and local environments
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+
+# Angular dependencies and build outputs
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Raw dataset and old pickles (not needed in the repo)
+data/cumulative.csv
+*.pkl
+
+# Local logs
+*.log
