@@ -1,5 +1,5 @@
 :host {
-  --paper: #eef2f5;
+  --paper: #000000;
   --sheet: #ffffff;
   --ink: #17213a;
   --ink-soft: #55627a;
@@ -45,20 +45,20 @@ h1 {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
   gap: 32px;
   align-items: start;
 }
 
 .sheet { background: var(--sheet); padding: 28px 32px 32px; border-top: 4px solid var(--navy); }
-.help { margin: 0 0 8px; color: var(--ink-soft); font-size: 0.92rem; }
+.help { margin: 0 0 8px; color: var(--ink-soft); font-size: .92rem; }
 
 fieldset { border: 0; border-top: 1px solid var(--rule); margin: 20px 0 0; padding: 14px 0 0; min-width: 0; }
 legend { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; padding: 0 12px 0 0; }
 
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; margin-top: 8px; }
 label { display: grid; gap: 6px; }
-.name { font-weight: 600; font-size: 0.95rem; }
+.name { font-weight: 600; font-size: .95rem; }
 .unit { font-weight: 400; color: var(--ink-soft); margin-left: 4px; }
 
 input, select {
@@ -88,12 +88,11 @@ button.primary {
   font-weight: 600;
 }
 button.primary:hover:not(:disabled) { background: #1b2c4f; }
-button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary:disabled { opacity: .45; cursor: not-allowed; }
 button.text {
   background: none; border: 0; padding: 6px 0;
   color: var(--ink); text-decoration: underline; text-underline-offset: 3px;
 }
-button.text:hover { color: #1b2c4f; text-decoration-thickness: 2px; }
 
 .scope {
   position: sticky;
@@ -101,6 +100,7 @@ button.text:hover { color: #1b2c4f; text-decoration-thickness: 2px; }
   background: var(--navy);
   color: #e9eef8;
   padding: 28px 28px 30px;
+  border: 1px solid #2b3b5c;
 }
 .scope h2 { font-family: var(--serif); font-size: 1.2rem; margin: 0 0 12px; font-weight: 700; }
 
@@ -108,7 +108,7 @@ button.text:hover { color: #1b2c4f; text-decoration-thickness: 2px; }
 .baseline { stroke: #2b3b5c; stroke-width: 1; stroke-dasharray: 4 5; }
 .flux { fill: none; stroke: var(--amber); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
 .flux.flat { stroke: var(--navy-soft); }
-.caption { margin: 8px 0 0; font-size: 0.85rem; color: var(--navy-soft); }
+.caption { margin: 8px 0 0; font-size: .85rem; color: var(--navy-soft); }
 
 .verdict { margin-top: 24px; padding-top: 20px; border-top: 1px solid #2b3b5c; }
 .call { font-family: var(--serif); font-size: 1.7rem; line-height: 1.2; margin: 0 0 16px; font-weight: 700; }
@@ -116,15 +116,15 @@ button.text:hover { color: #1b2c4f; text-decoration-thickness: 2px; }
 .call.fp { color: var(--fp); }
 
 .meter { position: relative; height: 10px; background: #22314f; border-radius: 2px; overflow: hidden; }
-.fill { height: 100%; transition: width 0.6s ease-out; }
+.fill { height: 100%; transition: width .6s ease-out; }
 .fill.planet { background: var(--planet); }
 .fill.fp { background: var(--fp); }
 .tick { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #e9eef8; }
 
 .prob { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
 .prob strong { font-family: var(--serif); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
-.raw { color: var(--navy-soft); font-size: 0.85rem; }
-.fine { margin: 14px 0 0; font-size: 0.8rem; color: var(--navy-soft); }
+.raw { color: var(--navy-soft); font-size: .85rem; }
+.fine { margin: 14px 0 0; font-size: .8rem; color: var(--navy-soft); }
 .empty { margin: 0; color: var(--navy-soft); }
 .error { margin: 0; color: #ffd0c4; font-weight: 600; }
 

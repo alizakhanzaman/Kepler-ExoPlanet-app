@@ -1,10 +1,19 @@
 <div class="page">
-  <header class="masthead">
-    <h1>Is this Kepler signal a planet?</h1>
-    <p class="lede">
+  <header class="masthead" style="max-width:none;">
+    <h1 style="color:#ffffff;">Kepler Exoplanet Classifier</h1>
+    <p class="lede" style="font-size:1.25rem;font-weight:600;color:#ffffff;">
+      Is this Kepler signal a real planet or a false positive?
+    </p>
+    <p class="lede" style="color:#c9d3e3;">
       Enter what Kepler measured for a candidate. A LightGBM model trained on
       confirmed planets and false positives estimates which one it is.
     </p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:20px;">
+      <span style="background:#f2b134;color:#000000;padding:8px 16px;border-radius:999px;font-weight:600;">Model: LightGBM</span>
+      <span style="background:#f2b134;color:#000000;padding:8px 16px;border-radius:999px;font-weight:600;">11 input features</span>
+      <span style="background:#f2b134;color:#000000;padding:8px 16px;border-radius:999px;font-weight:600;">Test F1: 0.893</span>
+      <span style="background:#f2b134;color:#000000;padding:8px 16px;border-radius:999px;font-weight:600;">ROC-AUC: 0.980</span>
+    </div>
   </header>
 
   @if (deployedStatic) {
@@ -51,7 +60,7 @@
 
       <div class="actions">
         <button type="submit" class="primary" [disabled]="loading() || deployedStatic">
-          {{ loading() ? 'Classifying…' : 'Classify signal' }}
+          {{ loading() ? 'Classifying…' : 'Run classifier' }}
         </button>
         <button type="button" class="text" (click)="loadSample()">Load a sample planet</button>
         <button type="button" class="text" (click)="clearAll()">Clear all</button>
@@ -104,9 +113,13 @@
           <p class="fine">{{ r.disclaimer }}</p>
         } @else {
           <h2>Classification</h2>
-          <p class="empty">Classify a signal to see the model's verdict here.</p>
+          <p class="empty">Press Run classifier to see the model's verdict here.</p>
         }
       </div>
     </aside>
   </div>
+  <footer style="margin-top:48px;padding-top:20px;border-top:3px solid #f2b134;display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;color:#ffffff;">
+    <span><strong>Built by Aliza Zaman</strong> &bull; Full-stack ML project: Flask + Angular + GitHub Actions</span>
+    <a style="color:#f2b134;" href="https://github.com/alizakhanzaman/Kepler-ExoPlanet-app" target="_blank" rel="noopener">View source on GitHub</a>
+  </footer>
 </div>
