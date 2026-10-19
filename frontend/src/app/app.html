@@ -1,54 +1,112 @@
-<main class="shell">
-  <header>
-    <h1>Kepler Exoplanet Classifier</h1>
-    <p>Teaching prototype &bull; CONFIRMED planet vs FALSE POSITIVE (Kepler KOI data)</p>
+<div class="page">
+  <header class="masthead">
+    <h1>Is this Kepler signal a planet?</h1>
+    <p class="lede">
+      Enter what Kepler measured for a candidate. A LightGBM model trained on
+      confirmed planets and false positives estimates which one it is.
+    </p>
   </header>
 
   @if (deployedStatic) {
-    <aside class="notice">Static GitHub Pages demonstration only.
-      Predictions require Flask and Angular running locally.</aside>
+    <p class="static-note" role="note">
+      This public page shows the form only. Classification runs on a local Flask
+      server, so the button is turned off here.
+    </p>
   }
 
-  <form (ngSubmit)="submit()">
-    <h2>Model input features ({{ fields.length }})</h2>
-    <p class="hint">Leave a field blank if unknown; the model fills it with the training median.</p>
-    <div class="grid">
-      @for (field of fields; track field.name) {
-        <label>{{ field.label }}
-          @if (field.kind === 'number') {
-            <input type="number" step="any" [name]="field.name"
-                   [min]="field.min ?? null" [max]="field.max ?? null"
-                   [(ngModel)]="values[field.name]" [required]="field.required" />
-          } @else {
-            <select [name]="field.name" [(ngModel)]="values[field.name]"
-                    [required]="field.required">
-              <option [ngValue]="null">Select a value</option>
-              @for (option of field.options ?? []; track option) {
-                <option [ngValue]="option">{{ option }}</option>
-              }
-            </select>
-          }
-        </label>
+  <div class="layout">
+    <form class="sheet" (ngSubmit)="submit()" aria-describedby="blank-help">
+      <p id="blank-help" class="help">
+        Every field is optional. A blank field is filled with the training median.
+      </p>
+
+      @for (group of groups; track group.name) {
+        <fieldset>
+          <legend>{{ group.name }}</legend>
+          <div class="fields">
+            @for (field of group.fields; track field.name) {
+              <label>
+                <span class="name">{{ field.label }}
+                  @if (field.unit) { <span class="unit">({{ field.unit }})</span> }
+                </span>
+                @if (field.kind === 'number') {
+                  <input type="number" step="any" inputmode="decimal"
+                         [name]="field.name" [placeholder]="field.hint ?? ''"
+                         [min]="field.min ?? null" [max]="field.max ?? null"
+                         [(ngModel)]="values[field.name]" [required]="field.required" />
+                } @else {
+                  <select [name]="field.name" [(ngModel)]="values[field.name]"
+                          [required]="field.required">
+                    <option [ngValue]="null">Select a value</option>
+                    @for (option of field.options ?? []; track option) {
+                      <option [ngValue]="option">{{ option }}</option>
+                    }
+                  </select>
+                }
+              </label>
+            }
+          </div>
+        </fieldset>
       }
-    </div>
-    <div class="actions">
-      <button type="submit" [disabled]="loading() || deployedStatic">
-        {{ loading() ? 'Predicting...' : 'Run local prediction' }}
-      </button>
-      <button type="button" class="secondary" (click)="fillExample()">Fill example</button>
-    </div>
-  </form>
 
-  @if (error()) {
-    <p class="error" role="alert">{{ error() }}</p>
-  }
+      <div class="actions">
+        <button type="submit" class="primary" [disabled]="loading() || deployedStatic">
+          {{ loading() ? 'Classifying…' : 'Classify signal' }}
+        </button>
+        <button type="button" class="text" (click)="loadSample()">Load a sample planet</button>
+        <button type="button" class="text" (click)="clearAll()">Clear all</button>
+      </div>
+    </form>
 
-  @if (result(); as r) {
-    <section class="result">
-      <h2>Prediction result</h2>
-      <p class="label"><strong>{{ r.prediction }}</strong></p>
-      <p>Probability of CONFIRMED: {{ (r.confirmed_probability * 100).toFixed(1) }}%</p>
-      <p class="hint">{{ r.disclaimer }}</p>
-    </section>
-  }
-</main>
+    <aside class="scope" aria-label="Transit preview and result">
+      <h2>Transit preview</h2>
+
+      <svg class="curve" role="img"
+           [attr.viewBox]="transit().ready ? '0 0 640 190' : '0 0 640 80'"
+           [attr.aria-label]="transit().ready
+             ? 'Starlight dipping three times as the planet crosses the star'
+             : 'Flat starlight line: enter period, duration and depth to preview the transit'">
+        <line x1="0" y1="40" x2="640" y2="40" class="baseline" />
+        @if (transit(); as t) {
+          @if (t.ready) {
+            <path [attr.d]="t.path" class="flux" />
+          } @else {
+            <path d="M0 40 L640 40" class="flux flat" />
+          }
+        }
+      </svg>
+      <p class="caption">
+        @if (transit().ready) {
+          Three transits, spaced by the orbital period. Dip width follows duration
+          ÷ period; depth is drawn on a log scale.
+        } @else {
+          Enter orbital period, transit duration and transit depth to see the dip.
+        }
+      </p>
+
+      <div class="verdict" aria-live="polite">
+        @if (error()) {
+          <p class="error" role="alert">{{ error() }}</p>
+        } @else if (result(); as r) {
+          <h2>Classification</h2>
+          <p class="call" [class.planet]="isPlanet(r)" [class.fp]="!isPlanet(r)">
+            {{ isPlanet(r) ? 'Likely a confirmed planet' : 'Likely a false positive' }}
+          </p>
+          <div class="meter" role="img" [attr.aria-label]="'Planet probability ' + percent(r) + ' percent'">
+            <div class="fill" [style.width.%]="percent(r)"
+                 [class.planet]="isPlanet(r)" [class.fp]="!isPlanet(r)"></div>
+            <div class="tick" title="50% decision line"></div>
+          </div>
+          <p class="prob">
+            <strong>{{ percent(r) }}%</strong> planet probability
+            <span class="raw">Model output: {{ r.prediction }}</span>
+          </p>
+          <p class="fine">{{ r.disclaimer }}</p>
+        } @else {
+          <h2>Classification</h2>
+          <p class="empty">Classify a signal to see the model's verdict here.</p>
+        }
+      </div>
+    </aside>
+  </div>
+</div>
