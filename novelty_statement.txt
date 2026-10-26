@@ -1,0 +1,60 @@
+NOVELTY STATEMENT - Kepler exoplanet classification
+Student: Aliza Zaman
+Base paper: J. Wang, "Using Machine Learning for Exoplanet Classification" (RARS preprint 1021)
+Dataset: Kaggle "Kepler Exoplanet Search Results" (NASA), cumulative.csv
+
+1. WHAT THE BASE PAPER DID
+- One model family only: scikit-learn MLPClassifier, tuned over 16 layer-size trials
+  (best: 300,200,200,100,100). Reported ROC AUC about 0.91 with precision/recall >= 0.6.
+- 11 hand-picked features; rows with missing values were deleted (about 4,599 of 9,564 kept).
+- No baseline models, no confidence intervals, no explainability analysis, no handling of
+  class imbalance, and CANDIDATE rows were never scored.
+- It only answers a yes/no question (planet or false positive).
+
+2. WHAT I HAVE ALREADY DONE BEYOND THE BASE PAPER (COMPLETED)
+a) No data loss: missing values are filled with training-set medians inside the model
+   pipeline, so all 7,316 labelled rows are used instead of deleting rows.
+b) Fair model comparison on the same data: Logistic Regression, Random Forest, XGBoost,
+   LightGBM and a paper-style MLP, with repeated stratified cross-validation on the
+   training split (F1, PR-AUC, MCC, mean +- std). On the paper's own 11 features, the
+   paper-style MLP gets F1 0.840 +- 0.013 (PR-AUC 0.910), while XGBoost gets 0.896
+   (PR-AUC 0.951) and LightGBM gets 0.895 (PR-AUC 0.951). Gradient boosting beats the
+   paper's model type on identical features.
+c) Feature-set comparison: all 36 numeric features give the best F1 for every model
+   (LightGBM 0.921 vs 0.895 on the paper's 11 features; MLP 0.899 vs 0.840). Removing the
+   measurement-error columns costs the most (LightGBM F1 0.901 without them). So the
+   paper's hand-picked 11 features leave useful information unused.
+d) Leak-safe evaluation: stratified hold-out test set used once; model chosen by
+   cross-validation (LightGBM, CV PR-AUC 0.952); bootstrap 95% confidence intervals on the
+   test set: LightGBM F1 0.893 [0.869, 0.914], PR-AUC 0.958, ROC-AUC 0.980 [0.973, 0.986].
+   Class weights are used because only 31.3% of the labels are CONFIRMED.
+e) Explainability: permutation importance (drop in PR-AUC) ranks signal-to-noise ratio
+   first (0.141), then planet radius (0.099), transit duration (0.058), orbital period
+   (0.054) and impact parameter (0.047). SHAP plots were also produced.
+f) Operating-point analysis: a decision threshold of 0.901 gives precision 0.950 at recall
+   0.749, useful when false alarms are costly.
+g) All 2,248 CANDIDATE signals (never used in training) were scored and ranked by the
+   probability that they are real planets.
+
+3. WHAT I WILL ADD NEXT (PLANNED): FROM DETECTION TO PRIORITISATION
+Old problem (base paper): is this signal a real planet or a false positive?
+New problem: among the unresolved CANDIDATE signals, which are most likely real AND most
+Earth-like, so that they deserve follow-up observation first?
+- Each candidate will get an Earth Similarity Score (ESS) from planet radius and insolation,
+  using the single-parameter form 1-|(x-x0)/(x+x0)| of the Earth Similarity Index
+  (Schulze-Makuch et al., 2011) combined by a geometric mean. ESS is ESI-inspired and is NOT
+  the full published ESI, which also needs density, escape velocity and surface temperature.
+- Priority will combine the model's probability with ESS. To avoid an arbitrary weighting,
+  I will also report the Pareto front and a sensitivity check that varies the weights.
+- The probability ranking will be checked against the current NASA Exoplanet Archive
+  dispositions. ESS has no ground truth and measures Earth-likeness, not habitability.
+- Because all 36 features perform better than the paper's 11, the research paper will report
+  the 36-feature model. The web demo keeps 11 features so a user can type every value.
+
+4. ENGINEERING CONTRIBUTION
+The model is delivered as a tested full-stack application (Flask API, Angular form,
+GitHub Actions CI/CD), so the work is reproducible and usable, not only a notebook result.
+
+5. LIMITATIONS
+The study uses Kepler's tabular catalogue values, not raw light curves, and inherits the
+labels and selection effects of that catalogue. Earth similarity does not imply habitability.
