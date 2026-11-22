@@ -1,0 +1,189 @@
+{
+  "note": "Precomputed with backend/models/model_bundle.joblib on real hold-out test rows (stratified 80/20 split, random_state=42). Not a live prediction.",
+  "holdout_check": {
+    "n_test": 1464,
+    "confusion_matrix": [
+      [
+        943,
+        62
+      ],
+      [
+        39,
+        420
+      ]
+    ],
+    "f1": 0.8927,
+    "roc_auc": 0.98,
+    "pr_auc": 0.9578
+  },
+  "examples": [
+    {
+      "kepoi_name": "K03026.01",
+      "kepler_name": "Kepler-1414 b",
+      "true_label": "CONFIRMED",
+      "prediction": "CONFIRMED",
+      "confirmed_probability": 0.9771,
+      "correct": true,
+      "inputs": {
+        "koi_period": 3.51575,
+        "koi_impact": 0.061,
+        "koi_duration": 1.381,
+        "koi_depth": 237.0,
+        "koi_prad": 1.35,
+        "koi_teq": 1033.0,
+        "koi_insol": 269.57,
+        "koi_model_snr": 15.2,
+        "koi_steff": 5094.0,
+        "koi_slogg": 4.45,
+        "koi_srad": 0.901
+      }
+    },
+    {
+      "kepoi_name": "K02628.01",
+      "kepler_name": "Kepler-1297 b",
+      "true_label": "CONFIRMED",
+      "prediction": "CONFIRMED",
+      "confirmed_probability": 0.6601,
+      "correct": true,
+      "inputs": {
+        "koi_period": 1.68189,
+        "koi_impact": 0.415,
+        "koi_duration": 2.992,
+        "koi_depth": 83.2,
+        "koi_prad": 1.27,
+        "koi_teq": 1790.0,
+        "koi_insol": 2432.14,
+        "koi_model_snr": 17.4,
+        "koi_steff": 5827.0,
+        "koi_slogg": 4.191,
+        "koi_srad": 1.374
+      }
+    },
+    {
+      "kepoi_name": "K02533.01",
+      "kepler_name": "Kepler-1270 b",
+      "true_label": "CONFIRMED",
+      "prediction": "CONFIRMED",
+      "confirmed_probability": 0.8394,
+      "correct": true,
+      "inputs": {
+        "koi_period": 6.03356,
+        "koi_impact": 0.35,
+        "koi_duration": 10.049,
+        "koi_depth": 89.5,
+        "koi_prad": 3.34,
+        "koi_teq": 1598.0,
+        "koi_insol": 1540.84,
+        "koi_model_snr": 26.1,
+        "koi_steff": 4924.0,
+        "koi_slogg": 3.356,
+        "koi_srad": 3.588
+      }
+    },
+    {
+      "kepoi_name": "K06593.01",
+      "kepler_name": null,
+      "true_label": "FALSE POSITIVE",
+      "prediction": "FALSE POSITIVE",
+      "confirmed_probability": 0.0156,
+      "correct": true,
+      "inputs": {
+        "koi_period": 0.75976,
+        "koi_impact": 0.455,
+        "koi_duration": 2.734,
+        "koi_depth": 70.0,
+        "koi_prad": 0.91,
+        "koi_teq": 2121.0,
+        "koi_insol": 4773.08,
+        "koi_model_snr": 15.9,
+        "koi_steff": 6090.0,
+        "koi_slogg": 4.447,
+        "koi_srad": 1.071
+      }
+    },
+    {
+      "kepoi_name": "K03338.02",
+      "kepler_name": null,
+      "true_label": "FALSE POSITIVE",
+      "prediction": "FALSE POSITIVE",
+      "confirmed_probability": 0.4321,
+      "correct": true,
+      "inputs": {
+        "koi_period": 10.99381,
+        "koi_impact": 0.924,
+        "koi_duration": 5.0403,
+        "koi_depth": 1460.0,
+        "koi_prad": 5.33,
+        "koi_teq": 978.0,
+        "koi_insol": 216.57,
+        "koi_model_snr": 100.4,
+        "koi_steff": 6553.0,
+        "koi_slogg": 4.366,
+        "koi_srad": 1.157
+      }
+    },
+    {
+      "kepoi_name": "K00210.01",
+      "kepler_name": null,
+      "true_label": "FALSE POSITIVE",
+      "prediction": "FALSE POSITIVE",
+      "confirmed_probability": 0.0055,
+      "correct": true,
+      "inputs": {
+        "koi_period": 20.92736,
+        "koi_impact": 0.991,
+        "koi_duration": 3.4256,
+        "koi_depth": 8090.0,
+        "koi_prad": 17.36,
+        "koi_teq": 735.0,
+        "koi_insol": 69.08,
+        "koi_model_snr": 263.5,
+        "koi_steff": 6126.0,
+        "koi_slogg": 4.358,
+        "koi_srad": 1.109
+      }
+    },
+    {
+      "kepoi_name": "K00245.04",
+      "kepler_name": "Kepler-37 e",
+      "true_label": "CONFIRMED",
+      "prediction": "FALSE POSITIVE",
+      "confirmed_probability": 0.0046,
+      "correct": false,
+      "inputs": {
+        "koi_period": 51.2069,
+        "koi_impact": null,
+        "koi_duration": 8.99,
+        "koi_depth": null,
+        "koi_prad": null,
+        "koi_teq": null,
+        "koi_insol": null,
+        "koi_model_snr": null,
+        "koi_steff": null,
+        "koi_slogg": null,
+        "koi_srad": null
+      }
+    },
+    {
+      "kepoi_name": "K01231.01",
+      "kepler_name": null,
+      "true_label": "FALSE POSITIVE",
+      "prediction": "CONFIRMED",
+      "confirmed_probability": 0.8322,
+      "correct": false,
+      "inputs": {
+        "koi_period": 22.34294,
+        "koi_impact": 0.001,
+        "koi_duration": 7.0813,
+        "koi_depth": 2690.0,
+        "koi_prad": 2.92,
+        "koi_teq": 399.0,
+        "koi_insol": 6.01,
+        "koi_model_snr": 35.3,
+        "koi_steff": 4260.0,
+        "koi_slogg": 4.663,
+        "koi_srad": 0.58
+      }
+    }
+  ]
+}
