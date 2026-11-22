@@ -1,0 +1,91 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">Research contribution</p>
+    <h1>Novelty: from detection to prioritisation</h1>
+    <p class="lede">The base paper asks a yes/no question: is this signal a planet? This project keeps that question,
+      answers it better, and then asks the question an observer actually faces: <strong>which unresolved candidates
+      deserve follow-up first?</strong></p>
+  </header>
+
+  <section class="section" aria-labelledby="cmp-h">
+    <h2 id="cmp-h">Base paper vs this work</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Aspect</th><th scope="col">Base paper (Wang, RARS preprint 1021)</th><th scope="col">This work</th></tr></thead>
+        <tbody>
+          <tr><td>Question</td><td>Planet or false positive?</td><td>Same, plus: which CANDIDATE signals to observe first</td></tr>
+          <tr><td>Models</td><td>One MLPClassifier, 16 layer-size trials</td><td>LogReg, Random Forest, XGBoost, LightGBM, paper-style MLP</td></tr>
+          <tr><td>Missing values</td><td>Rows deleted (listwise)</td><td>Median imputation inside the pipeline; all 7,316 labelled rows used</td></tr>
+          <tr><td>Evaluation</td><td>Single test result, ROC-AUC about 0.91</td><td>Repeated stratified CV, untouched hold-out test, 95% bootstrap CIs</td></tr>
+          <tr><td>Imbalance</td><td>Not addressed</td><td>Class weights; PR-AUC as selection metric</td></tr>
+          <tr><td>Explainability</td><td>None</td><td>Permutation importance (plus SHAP in the notebook)</td></tr>
+          <tr><td>Feature choice</td><td>11 hand-picked features</td><td>Ablation over 4 feature sets (36 / 31 / 16 / 11)</td></tr>
+          <tr><td>CANDIDATE rows</td><td>Discarded, never scored</td><td>All 2,248 scored and ranked by p_planet &times; ESS, with a Pareto front</td></tr>
+          <tr><td>External check</td><td>None</td><td>Ranking compared with today's NASA Exoplanet Archive dispositions</td></tr>
+          <tr><td>Delivery</td><td>Paper only</td><td>Tested Flask API, Angular site, CI/CD to GitHub Pages</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="def-h">
+    <h2 id="def-h">How the priority score is defined</h2>
+    <div class="grid three">
+      <div class="panel"><h3>p<sub>planet</sub></h3><p>Probability of CONFIRMED from the deployed LightGBM pipeline. CANDIDATE rows were never used in training.</p></div>
+      <div class="panel"><h3>Earth Similarity Score</h3>
+        <p><code>sim(x) = 1 &minus; |(x &minus; 1)/(x + 1)|</code> for radius (Earth radii) and insolation (Earth flux);
+          <code>ESS = &radic;(sim(R) &middot; sim(S))</code>.</p></div>
+      <div class="panel"><h3>Priority</h3><p><code>priority = p<sub>planet</sub> &times; ESS</code>. Because any weighting is a choice, the Pareto front and a sensitivity check are reported alongside.</p></div>
+    </div>
+    <p class="callout teal note-ess">ESS is <strong>ESI-inspired only</strong>. The published Earth Similarity Index
+      (Schulze-Makuch et al., 2011) combines radius, bulk density, escape velocity and surface temperature; it does
+      not use insolation. ESS borrows the same similarity form for the two quantities the Kepler catalogue actually gives.
+      It measures Earth-likeness, <strong>not habitability</strong>.</p>
+  </section>
+
+  <section class="section" aria-labelledby="done-h">
+    <h2 id="done-h">Contributions and status</h2>
+    <div class="grid two">
+      <div class="panel">
+        <h3><span class="chip done">Completed</span></h3>
+        @if (res.hasValue() ? res.value() : null; as r) {
+          <ol class="status">
+            <li><strong>Replication</strong> of the base paper's MLP on its 11 features:
+              @if (rep(); as rows) { ROC-AUC {{ rows[1].roc_auc | number: '1.3-3' }} (raw) / {{ rows[2].roc_auc | number: '1.3-3' }} (standardised) vs 0.91 reported. }</li>
+            <li><strong>Benchmark</strong> of five model families: LightGBM CV F1 {{ r.cv_f1[0].f1[3] }} vs paper-style MLP {{ r.cv_f1[3].f1[3] }} on the same 11 features.</li>
+            <li><strong>Leak-safe hold-out</strong>: LightGBM F1 {{ r.holdout[2].f1 }} [{{ r.holdout[2].f1_ci?.[0] }}, {{ r.holdout[2].f1_ci?.[1] }}], ROC-AUC {{ r.holdout[2].roc_auc }}.</li>
+            <li><strong>Explainability</strong>: signal-to-noise ratio and planet radius matter most.</li>
+            @if (p(); as pr) {
+              <li><strong>Prioritisation</strong>: {{ pr.n_candidates | number }} candidates scored; {{ pr.n_scored_ess | number }} have an ESS
+                ({{ pr.n_dropped_missing_prad_or_insol }} dropped for missing radius or insolation); {{ pr.n_pareto }} sit on the Pareto front.</li>
+              <li><strong>Sensitivity</strong>: Spearman {{ pr.sensitivity['p_x_ess2'].spearman }} vs p&middot;ESS&sup2; and {{ pr.sensitivity['p2_x_ess'].spearman }} vs p&sup2;&middot;ESS;
+                top-20 overlap {{ pr.sensitivity['p_x_ess2'].top20_overlap }}/20 and {{ pr.sensitivity['p2_x_ess'].top20_overlap }}/20.</li>
+              @if (pr.nasa_check.ok && pr.nasa_check.by_probability_rank; as g) {
+                <li><strong>NASA archive check</strong>: of the top 100 candidates by p<sub>planet</sub>,
+                  {{ g['top100']['CONFIRMED'] ?? 0 }} are now CONFIRMED and {{ g['top100']['FALSE POSITIVE'] ?? 0 }} FALSE POSITIVE, versus
+                  {{ g['all_candidates']['confirmed_rate'] * 100 | number: '1.1-1' }}% confirmed across all candidates.
+                  ROC-AUC {{ pr.nasa_check.resolved_roc_auc }} on the {{ pr.nasa_check.resolved_since_snapshot }} candidates resolved since the snapshot.</li>
+              } @else {
+                <li><strong>NASA archive check</strong>: attempted, but the archive could not be queried. See the Prioritisation page for the error.</li>
+              }
+            }
+            <li><strong>Engineering</strong>: tested Flask API, this multi-page Angular site, CI and CD to GitHub Pages.</li>
+          </ol>
+        } @else if (res.isLoading()) {
+          <p class="state" role="status">Loading&hellip;</p>
+        } @else {
+          <p class="state error" role="alert">Could not load results.json.</p>
+        }
+        <a routerLink="/prioritisation" class="btn ghost">Explore the ranked candidates</a>
+      </div>
+      <div class="panel">
+        <h3><span class="chip planned">Planned, not done yet</span></h3>
+        <ol class="status">
+          @for (item of planned; track item.title) {
+            <li><strong>{{ item.title }}</strong>: {{ item.text }}</li>
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+</div>

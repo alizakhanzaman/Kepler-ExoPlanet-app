@@ -22,3 +22,6 @@ data/cumulative.csv
 
 # Local logs
 *.log
+
+# Private study notes (never pushed)
+notes_private/

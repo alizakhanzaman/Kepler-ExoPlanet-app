@@ -1,0 +1,11 @@
+.flow { min-width: 640px; }
+.panel:has(> .flow) { overflow-x: auto; }
+.node { fill: rgba(124, 58, 237, .2); stroke: rgba(167, 139, 250, .7); stroke-width: 1.2; }
+.node.model { fill: rgba(94, 234, 212, .12); stroke: rgba(94, 234, 212, .7); }
+.chart .node-title { fill: #fff; font-family: var(--serif); font-size: 17px; font-weight: 700; }
+.chart .node-sub { fill: var(--soft); font-size: 11.5px; }
+.edge { stroke: var(--gold); stroke-width: 2; }
+.arrowhead { fill: var(--gold); }
+.steps { margin-top: 18px; }
+.steps p { color: var(--soft); margin: 0; }
+td code { background: none; }

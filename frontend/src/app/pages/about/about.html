@@ -1,0 +1,39 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">Project</p>
+    <h1>About</h1>
+    <p class="lede">A university lab and research project by Aliza Zaman (BSSE). It replicates a published exoplanet
+      classifier, benchmarks it properly, and extends it from detection to prioritisation of unresolved Kepler candidates.</p>
+  </header>
+
+  <div class="grid two">
+    <section class="panel" aria-labelledby="sum-h">
+      <h2 id="sum-h">Summary</h2>
+      <p>Data: the NASA Kepler cumulative KOI table (Kaggle snapshot, 9,564 signals). Model: a scikit-learn pipeline with
+        median imputation, standard scaling and LightGBM, trained on the 7,316 labelled signals with the base paper's 11
+        features. The 2,248 CANDIDATE signals are never used for training; they are scored and ranked.</p>
+      <p>Source code, workflows and research scripts: <a [href]="repo" target="_blank" rel="noopener">github.com/alizakhanzaman/Kepler-ExoPlanet-app</a>.</p>
+      <p><a routerLink="/novelty">What is new</a> &middot; <a routerLink="/results">Benchmarks</a> &middot; <a routerLink="/literature">References</a></p>
+    </section>
+
+    <section class="panel" aria-labelledby="eth-h">
+      <h2 id="eth-h">Ethics and intended use</h2>
+      <p>This is a teaching and research prototype. Its output is not a validated astronomical classification and should not
+        be cited as a discovery or used to claim that any object is habitable. All data are public; no personal data are
+        collected, and the site sets no cookies and loads no third-party scripts or fonts.</p>
+    </section>
+  </div>
+
+  <section class="section panel" aria-labelledby="lim-h">
+    <h2 id="lim-h">Limitations and threats to validity</h2>
+    <ul class="lim">
+      <li><strong>Catalogue values, not light curves.</strong> The model sees fitted parameters from the Kepler pipeline, so it inherits that pipeline's errors and cannot spot problems visible only in the raw signal.</li>
+      <li><strong>Labels and selection effects.</strong> CONFIRMED and FALSE POSITIVE labels come from NASA vetting; signals that were easy to resolve are over-represented among labelled rows, so CANDIDATE rows may differ from the training distribution.</li>
+      <li><strong>ESS is not habitability.</strong> It compares radius and insolation with Earth's only. Atmosphere, mass, orbit eccentricity and stellar activity are ignored, and its weighting is a design choice (sensitivity is reported).</li>
+      <li><strong>Uncalibrated probabilities.</strong> p_planet is a model score; calibration is planned, not done.</li>
+      <li><strong>NASA check is not independent.</strong> Candidates resolved since the snapshot were not chosen at random, and NASA's vetting uses related signals, so agreement is supportive rather than proof.</li>
+      <li><strong>Replication assumptions.</strong> The base paper does not state its split ratio, seed or scaling; the choices made here are listed on the Results page.</li>
+      <li><strong>Demo model uses 11 features.</strong> The 36-feature model scores higher in cross-validation but needs inputs a user cannot type by hand.</li>
+    </ul>
+  </section>
+</div>

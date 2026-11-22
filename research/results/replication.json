@@ -1,0 +1,435 @@
+{
+  "paper": {
+    "citation": "J. Wang, 'Using Machine Learning for Exoplanet Classification', Research Archive of Rising Scholars, preprint 1021",
+    "trial15_reported": {
+      "recall_fp": 0.95,
+      "precision_fp": 0.83,
+      "recall_confirmed": 0.6,
+      "precision_confirmed": 0.85,
+      "roc_auc": 0.91
+    },
+    "rows_after_dropna_reported_in_text": 4599
+  },
+  "data": {
+    "n_kois": 9564,
+    "n_labelled": 7316,
+    "n_after_dropna": 7016,
+    "confirmed_share": 0.3267
+  },
+  "protocol": {
+    "split": "stratified train_test_split, test_size=0.25 (sklearn default; the paper does not state a ratio), seeds 0,1,2 = the paper's 3 runs",
+    "mlp": "MLPClassifier(activation='relu', solver='adam'), other params sklearn defaults",
+    "faithful_scaling": "none (the paper mentions no scaling)",
+    "threshold": 0.5
+  },
+  "trial15_faithful": {
+    "layers": [
+      300,
+      200,
+      200,
+      100,
+      100
+    ],
+    "runs": [
+      {
+        "roc_auc": 0.8924,
+        "f1_confirmed": 0.6673,
+        "precision_fp": 0.8233,
+        "recall_fp": 0.9035,
+        "precision_confirmed": 0.7511,
+        "recall_confirmed": 0.6003
+      },
+      {
+        "roc_auc": 0.8924,
+        "f1_confirmed": 0.6572,
+        "precision_fp": 0.814,
+        "recall_fp": 0.9263,
+        "precision_confirmed": 0.7878,
+        "recall_confirmed": 0.5637
+      },
+      {
+        "roc_auc": 0.8789,
+        "f1_confirmed": 0.7211,
+        "precision_fp": 0.9373,
+        "recall_fp": 0.7087,
+        "precision_confirmed": 0.6005,
+        "recall_confirmed": 0.9023
+      }
+    ],
+    "summary": {
+      "roc_auc": {
+        "mean": 0.8879,
+        "std": 0.0064
+      },
+      "f1_confirmed": {
+        "mean": 0.6818,
+        "std": 0.028
+      },
+      "precision_fp": {
+        "mean": 0.8582,
+        "std": 0.0561
+      },
+      "recall_fp": {
+        "mean": 0.8462,
+        "std": 0.0976
+      },
+      "precision_confirmed": {
+        "mean": 0.7131,
+        "std": 0.0811
+      },
+      "recall_confirmed": {
+        "mean": 0.6888,
+        "std": 0.1517
+      }
+    }
+  },
+  "trial15_standardised": {
+    "layers": [
+      300,
+      200,
+      200,
+      100,
+      100
+    ],
+    "runs": [
+      {
+        "roc_auc": 0.9731,
+        "f1_confirmed": 0.8741,
+        "precision_fp": 0.9333,
+        "recall_fp": 0.9475,
+        "precision_confirmed": 0.8883,
+        "recall_confirmed": 0.8604
+      },
+      {
+        "roc_auc": 0.9568,
+        "f1_confirmed": 0.8444,
+        "precision_fp": 0.9239,
+        "recall_fp": 0.9255,
+        "precision_confirmed": 0.8459,
+        "recall_confirmed": 0.8429
+      },
+      {
+        "roc_auc": 0.9483,
+        "f1_confirmed": 0.8448,
+        "precision_fp": 0.943,
+        "recall_fp": 0.8959,
+        "precision_confirmed": 0.8054,
+        "recall_confirmed": 0.8883
+      }
+    ],
+    "summary": {
+      "roc_auc": {
+        "mean": 0.9594,
+        "std": 0.0103
+      },
+      "f1_confirmed": {
+        "mean": 0.8544,
+        "std": 0.0139
+      },
+      "precision_fp": {
+        "mean": 0.9334,
+        "std": 0.0078
+      },
+      "recall_fp": {
+        "mean": 0.9229,
+        "std": 0.0212
+      },
+      "precision_confirmed": {
+        "mean": 0.8465,
+        "std": 0.0339
+      },
+      "recall_confirmed": {
+        "mean": 0.8639,
+        "std": 0.0187
+      }
+    }
+  },
+  "lightgbm_same_splits": {
+    "runs": [
+      {
+        "roc_auc": 0.9815,
+        "f1_confirmed": 0.891,
+        "precision_fp": 0.9566,
+        "recall_fp": 0.934,
+        "precision_confirmed": 0.8702,
+        "recall_confirmed": 0.9127
+      },
+      {
+        "roc_auc": 0.9751,
+        "f1_confirmed": 0.8891,
+        "precision_fp": 0.9581,
+        "recall_fp": 0.9297,
+        "precision_confirmed": 0.8635,
+        "recall_confirmed": 0.9162
+      },
+      {
+        "roc_auc": 0.9778,
+        "f1_confirmed": 0.8995,
+        "precision_fp": 0.954,
+        "recall_fp": 0.9475,
+        "precision_confirmed": 0.8933,
+        "recall_confirmed": 0.9058
+      }
+    ],
+    "summary": {
+      "roc_auc": {
+        "mean": 0.9781,
+        "std": 0.0026
+      },
+      "f1_confirmed": {
+        "mean": 0.8932,
+        "std": 0.0045
+      },
+      "precision_fp": {
+        "mean": 0.9562,
+        "std": 0.0017
+      },
+      "recall_fp": {
+        "mean": 0.9371,
+        "std": 0.0076
+      },
+      "precision_confirmed": {
+        "mean": 0.8757,
+        "std": 0.0128
+      },
+      "recall_confirmed": {
+        "mean": 0.9116,
+        "std": 0.0044
+      }
+    }
+  },
+  "trial_sweep_faithful": [
+    {
+      "trial": 1,
+      "layers": [
+        50,
+        50
+      ],
+      "roc_auc": 0.906,
+      "f1_confirmed": 0.5484,
+      "precision_fp": 0.7799,
+      "recall_fp": 0.961,
+      "precision_confirmed": 0.8605,
+      "recall_confirmed": 0.4276
+    },
+    {
+      "trial": 2,
+      "layers": [
+        70,
+        30
+      ],
+      "roc_auc": 0.9024,
+      "f1_confirmed": 0.735,
+      "precision_fp": 0.938,
+      "recall_fp": 0.7353,
+      "precision_confirmed": 0.6293,
+      "recall_confirmed": 0.8947
+    },
+    {
+      "trial": 3,
+      "layers": [
+        40,
+        60
+      ],
+      "roc_auc": 0.8987,
+      "f1_confirmed": 0.7329,
+      "precision_fp": 0.9371,
+      "recall_fp": 0.7347,
+      "precision_confirmed": 0.6352,
+      "recall_confirmed": 0.8877
+    },
+    {
+      "trial": 4,
+      "layers": [
+        200,
+        200
+      ],
+      "roc_auc": 0.8795,
+      "f1_confirmed": 0.6552,
+      "precision_fp": 0.8357,
+      "recall_fp": 0.8761,
+      "precision_confirmed": 0.7483,
+      "recall_confirmed": 0.6225
+    },
+    {
+      "trial": 5,
+      "layers": [
+        300,
+        300
+      ],
+      "roc_auc": 0.8767,
+      "f1_confirmed": 0.6096,
+      "precision_fp": 0.8835,
+      "recall_fp": 0.7203,
+      "precision_confirmed": 0.6491,
+      "recall_confirmed": 0.7301
+    },
+    {
+      "trial": 6,
+      "layers": [
+        400,
+        400
+      ],
+      "roc_auc": 0.9019,
+      "f1_confirmed": 0.6534,
+      "precision_fp": 0.8386,
+      "recall_fp": 0.8846,
+      "precision_confirmed": 0.7816,
+      "recall_confirmed": 0.6195
+    },
+    {
+      "trial": 7,
+      "layers": [
+        500,
+        500
+      ],
+      "roc_auc": 0.894,
+      "f1_confirmed": 0.7346,
+      "precision_fp": 0.9411,
+      "recall_fp": 0.7245,
+      "precision_confirmed": 0.6343,
+      "recall_confirmed": 0.8965
+    },
+    {
+      "trial": 8,
+      "layers": [
+        100,
+        100,
+        100
+      ],
+      "roc_auc": 0.9104,
+      "f1_confirmed": 0.6855,
+      "precision_fp": 0.8917,
+      "recall_fp": 0.8216,
+      "precision_confirmed": 0.7164,
+      "recall_confirmed": 0.7481
+    },
+    {
+      "trial": 9,
+      "layers": [
+        200,
+        200,
+        200
+      ],
+      "roc_auc": 0.8715,
+      "f1_confirmed": 0.6414,
+      "precision_fp": 0.8578,
+      "recall_fp": 0.7993,
+      "precision_confirmed": 0.6777,
+      "recall_confirmed": 0.68
+    },
+    {
+      "trial": 10,
+      "layers": [
+        300,
+        300,
+        300
+      ],
+      "roc_auc": 0.8914,
+      "f1_confirmed": 0.6136,
+      "precision_fp": 0.8557,
+      "recall_fp": 0.8323,
+      "precision_confirmed": 0.7009,
+      "recall_confirmed": 0.6504
+    },
+    {
+      "trial": 11,
+      "layers": [
+        400,
+        400,
+        400
+      ],
+      "roc_auc": 0.9033,
+      "f1_confirmed": 0.7001,
+      "precision_fp": 0.8902,
+      "recall_fp": 0.8321,
+      "precision_confirmed": 0.7132,
+      "recall_confirmed": 0.7528
+    },
+    {
+      "trial": 12,
+      "layers": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "roc_auc": 0.8935,
+      "f1_confirmed": 0.6145,
+      "precision_fp": 0.8335,
+      "recall_fp": 0.8721,
+      "precision_confirmed": 0.7796,
+      "recall_confirmed": 0.5945
+    },
+    {
+      "trial": 13,
+      "layers": [
+        200,
+        200,
+        200,
+        100
+      ],
+      "roc_auc": 0.9067,
+      "f1_confirmed": 0.7343,
+      "precision_fp": 0.8932,
+      "recall_fp": 0.8498,
+      "precision_confirmed": 0.7437,
+      "recall_confirmed": 0.7702
+    },
+    {
+      "trial": 14,
+      "layers": [
+        300,
+        200,
+        200,
+        100
+      ],
+      "roc_auc": 0.913,
+      "f1_confirmed": 0.7496,
+      "precision_fp": 0.8876,
+      "recall_fp": 0.871,
+      "precision_confirmed": 0.7566,
+      "recall_confirmed": 0.7615
+    },
+    {
+      "trial": 15,
+      "layers": [
+        300,
+        200,
+        200,
+        100,
+        100
+      ],
+      "roc_auc": 0.8879,
+      "f1_confirmed": 0.6818,
+      "precision_fp": 0.8582,
+      "recall_fp": 0.8462,
+      "precision_confirmed": 0.7131,
+      "recall_confirmed": 0.6888
+    },
+    {
+      "trial": 16,
+      "layers": [
+        300,
+        200,
+        200,
+        200,
+        200
+      ],
+      "roc_auc": 0.9171,
+      "f1_confirmed": 0.7547,
+      "precision_fp": 0.8704,
+      "recall_fp": 0.9077,
+      "precision_confirmed": 0.7919,
+      "recall_confirmed": 0.7213
+    }
+  ],
+  "ambiguities": [
+    "Train/test split ratio, stratification and seed are not stated.",
+    "Feature scaling is not mentioned.",
+    "max_iter / early stopping / learning rate are not stated.",
+    "Text reports 4599 rows after dropna, but the paper's Table 2 shows count 7016 for most columns.",
+    "Abstract says CNN; the method section and results use an MLPClassifier."
+  ],
+  "runtime_seconds": 1884.6
+}

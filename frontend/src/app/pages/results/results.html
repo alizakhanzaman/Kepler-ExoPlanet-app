@@ -1,0 +1,207 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">Benchmarks</p>
+    <h1>Results</h1>
+    <p class="lede">Model comparison, feature ablation, the held-out test, explainability and a re-run of the base
+      paper. Every number on this page is read from <code>data/results.json</code>, which is built by the scripts in
+      <code>research/</code> and the training notebook.</p>
+  </header>
+
+  @if (res.isLoading()) {
+    <p class="state" role="status">Loading results&hellip;</p>
+  } @else if (res.error()) {
+    <p class="state error" role="alert">Could not load results.json.</p>
+  } @else if (res.value(); as r) {
+    <section class="grid four" aria-label="Dataset">
+      <div class="panel metric"><span class="value">{{ r.dataset['n_kois'] | number }}</span><span class="label">KOIs in the catalogue</span></div>
+      <div class="panel metric"><span class="value">{{ r.dataset['labelled'] | number }}</span><span class="label">Labelled (CONFIRMED or FALSE POSITIVE)</span><span class="sub">{{ r.dataset['confirmed_share'] * 100 | number: '1.1-1' }}% CONFIRMED</span></div>
+      <div class="panel metric"><span class="value">{{ r.dataset['train'] | number }} / {{ r.dataset['test'] | number }}</span><span class="label">Train / test rows</span><span class="sub">stratified 80/20, seed 42</span></div>
+      <div class="panel metric"><span class="value">{{ r.dataset['candidate'] | number }}</span><span class="label">CANDIDATE rows, never trained on</span></div>
+    </section>
+
+    <!-- Hold-out -->
+    <section class="section" aria-labelledby="h-hold">
+      <h2 id="h-hold">Held-out test, paper's 11 features</h2>
+      <p class="section-intro">The test split was used once, after model selection by cross-validation. Brackets are 95% bootstrap intervals where the notebook computed them.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>LightGBM was selected by cross-validated PR-AUC ({{ r.selection[2].cv_pr_auc }} vs XGBoost {{ r.selection[1].cv_pr_auc }}, LogReg {{ r.selection[0].cv_pr_auc }}). It is the deployed model.</caption>
+          <thead><tr><th scope="col">Model</th><th scope="col" class="num">F1</th><th scope="col" class="num">PR-AUC</th><th scope="col" class="num">ROC-AUC</th><th scope="col" class="num">Recall</th><th scope="col" class="num">Precision</th></tr></thead>
+          <tbody>
+            @for (h of r.holdout; track h.name) {
+              <tr [class.best]="h.name === 'LightGBM'">
+                <td>{{ h.name }}</td>
+                <td class="num">{{ h.f1 | number: '1.3-3' }}@if (h.f1_ci) { <span class="ci">[{{ h.f1_ci[0] }}, {{ h.f1_ci[1] }}]</span> }</td>
+                <td class="num">{{ h.pr_auc | number: '1.3-3' }}@if (h.pr_auc_ci) { <span class="ci">[{{ h.pr_auc_ci[0] }}, {{ h.pr_auc_ci[1] }}]</span> }</td>
+                <td class="num">{{ h.roc_auc | number: '1.3-3' }}@if (h.roc_auc_ci) { <span class="ci">[{{ h.roc_auc_ci[0] }}, {{ h.roc_auc_ci[1] }}]</span> }</td>
+                <td class="num">{{ h.recall === null ? 'n/r' : (h.recall | number: '1.3-3') }}</td>
+                <td class="num">{{ h.precision === null ? 'n/r' : (h.precision | number: '1.3-3') }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="note">n/r: not reported in the notebook.</p>
+    </section>
+
+    <!-- Heatmap -->
+    <section class="section" aria-labelledby="h-heat">
+      <h2 id="h-heat">Feature-set ablation (cross-validated F1)</h2>
+      <p class="section-intro">Repeated stratified 5-fold CV (2 repeats) on the training split. Every model does best with all 36 features; the paper's 11 features leave information unused, and dropping the measurement-error columns costs the most.</p>
+      @if (heat(); as hm) {
+        <div class="grid two">
+          <div class="panel">
+            <svg class="chart" viewBox="0 0 560 250" role="img" aria-labelledby="heat-title">
+              <title id="heat-title">Heatmap of cross-validated F1 for five models and four feature sets</title>
+              @for (fs of r.feature_sets; track fs.key; let j = $index) {
+                <text [attr.x]="170 + j * 96 + 46" y="16" text-anchor="middle">{{ fs.label }}</text>
+                <text [attr.x]="170 + j * 96 + 46" y="30" text-anchor="middle" class="sub">({{ fs.n }})</text>
+              }
+              @for (row of hm.rows; track row.name; let i = $index) {
+                <text x="160" [attr.y]="40 + i * 42 + 25" text-anchor="end">{{ row.name }}</text>
+                @for (c of row.cells; track $index; let j = $index) {
+                  <rect [attr.x]="170 + j * 96" [attr.y]="40 + i * 42" width="92" height="38" rx="6" [attr.fill]="c.fill" />
+                  <text [attr.x]="170 + j * 96 + 46" [attr.y]="40 + i * 42 + 24" text-anchor="middle"
+                        class="cell" [class.dark]="c.dark">{{ c.v | number: '1.3-3' }}</text>
+                }
+              }
+            </svg>
+            <p class="note">Colour runs from violet ({{ hm.lo }}) to gold ({{ hm.hi }}).</p>
+          </div>
+          <div class="panel">
+            <h3>PR-AUC on the paper's 11 features (CV)</h3>
+            <ul class="clean bars">
+              @for (m of r.pr_auc_11; track m.name) {
+                <li><span class="bl">{{ m.name }}</span>
+                  <span class="track"><span class="bar" [style.width.%]="m.pr_auc * 100"></span></span>
+                  <span class="bv">{{ m.pr_auc | number: '1.3-3' }}</span></li>
+              }
+            </ul>
+            <p class="note">On identical features the paper's model family (MLP, F1 {{ r.cv_f1[3].f1[3] }}) trails gradient boosting (LightGBM {{ r.cv_f1[0].f1[3] }}, XGBoost {{ r.cv_f1[1].f1[3] }}).</p>
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- Confusion + threshold -->
+    <section class="section" aria-labelledby="h-cm">
+      <h2 id="h-cm">Errors and operating points (LightGBM, test set)</h2>
+      <div class="grid two">
+        <div class="panel">
+          <h3>Confusion matrix at threshold 0.5</h3>
+          @if (cm(); as cells) {
+            <svg class="chart" viewBox="0 0 400 300" role="img" aria-labelledby="cm-title">
+              <title id="cm-title">Confusion matrix: {{ cells[0].v }} true negatives, {{ cells[1].v }} false alarms, {{ cells[2].v }} missed planets, {{ cells[3].v }} true positives</title>
+              <text x="250" y="16" text-anchor="middle">Predicted</text>
+              <text x="185" y="40" text-anchor="middle">FALSE POS.</text>
+              <text x="320" y="40" text-anchor="middle">CONFIRMED</text>
+              <text x="20" y="170" transform="rotate(-90 20 170)" text-anchor="middle">Actual</text>
+              <text x="108" y="110" text-anchor="end">FALSE POS.</text>
+              <text x="108" y="240" text-anchor="end">CONFIRMED</text>
+              @for (c of cells; track c.label) {
+                <rect [attr.x]="120 + c.c * 134" [attr.y]="50 + c.r * 128" width="128" height="122" rx="10"
+                      [attr.fill]="c.good ? 'rgba(94,234,212,' + c.alpha + ')' : 'rgba(255,143,163,' + c.alpha + ')'" />
+                <text [attr.x]="184 + c.c * 134" [attr.y]="108 + c.r * 128" text-anchor="middle" class="big">{{ c.v }}</text>
+                <text [attr.x]="184 + c.c * 134" [attr.y]="132 + c.r * 128" text-anchor="middle" class="small">{{ c.label }}</text>
+              }
+            </svg>
+          }
+        </div>
+        <div class="panel">
+          <h3>Threshold trade-off</h3>
+          @if (thr(); as g) {
+            <svg class="chart" [attr.viewBox]="'0 0 ' + g.W + ' ' + g.H" role="img" aria-labelledby="thr-title">
+              <title id="thr-title">Precision rises and recall falls as the decision threshold increases</title>
+              @for (v of g.yticks; track v) {
+                <line [attr.x1]="g.L" [attr.x2]="g.W - g.R" [attr.y1]="g.y(v)" [attr.y2]="g.y(v)" class="grid-line" />
+                <text [attr.x]="g.L - 6" [attr.y]="g.y(v) + 4" text-anchor="end">{{ v }}</text>
+              }
+              @for (v of g.xticks; track v) {
+                <text [attr.x]="g.x(v)" [attr.y]="g.H - 10" text-anchor="middle">{{ v }}</text>
+              }
+              <line [attr.x1]="g.L" [attr.x2]="g.W - g.R" [attr.y1]="g.H - g.B" [attr.y2]="g.H - g.B" class="axis" />
+              @for (m of g.marks; track m.t; let mi = $index) {
+                <line [attr.x1]="g.x(m.t)" [attr.x2]="g.x(m.t)" [attr.y1]="g.T" [attr.y2]="g.H - g.B" class="mark" />
+                <text [attr.x]="g.x(m.t) + (m.t > 0.8 ? -4 : 4)" [attr.y]="g.T + 12 + mi * 16" [attr.text-anchor]="m.t > 0.8 ? 'end' : 'start'" class="marklabel">t={{ m.t }}: P {{ m.precision }}, R {{ m.recall }}</text>
+              }
+              <path [attr.d]="g.precision" class="l-prec" />
+              <path [attr.d]="g.recall" class="l-rec" />
+              <path [attr.d]="g.f1" class="l-f1" />
+            </svg>
+            <div class="legend"><span><i class="k-prec"></i>Precision</span><span><i class="k-rec"></i>Recall</span><span><i class="k-f1"></i>F1</span></div>
+            <p class="note">Raising the threshold to 0.901 trades recall for precision: useful when a false alarm costs telescope time. {{ g.source }}</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Importance -->
+    <section class="section" aria-labelledby="h-imp">
+      <h2 id="h-imp">What the model relies on</h2>
+      <p class="section-intro">Permutation importance on the test set: the drop in PR-AUC when one feature is shuffled.</p>
+      <div class="panel">
+        <ul class="clean bars wide">
+          @for (d of imp(); track d.feature) {
+            <li><span class="bl">{{ d.label }} <code>{{ d.feature }}</code></span>
+              <span class="track"><span class="bar gold" [style.width.%]="d.w"></span></span>
+              <span class="bv">{{ d.drop | number: '1.4-4' }}</span></li>
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- Replication -->
+    <section class="section" aria-labelledby="h-rep">
+      <h2 id="h-rep">Replication of the base paper</h2>
+      <p class="section-intro">Wang's MLP (300, 200, 200, 100, 100), ReLU, Adam, the same 11 features and listwise deletion, re-run by
+        <code>research/replicate_base_paper.py</code>. Mean over 3 runs (the paper also ran each trial 3 times).
+        After deletion, {{ r.replication.rows_after_dropna | number }} rows remain; the paper's text says {{ r.replication.rows_reported_in_text | number }}.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Setting</th><th scope="col" class="num">ROC-AUC</th><th scope="col" class="num">Recall FP</th><th scope="col" class="num">Precision FP</th><th scope="col" class="num">Recall CONF.</th><th scope="col" class="num">Precision CONF.</th></tr></thead>
+          <tbody>
+            @for (row of r.replication.rows; track row.label) {
+              <tr>
+                <td>{{ row.label }}</td>
+                <td class="num">{{ row.roc_auc_std === null ? row.roc_auc : (row.roc_auc | number: '1.3-3') }}@if (row.roc_auc_std !== null) { <span class="ci">&plusmn;{{ row.roc_auc_std | number: '1.3-3' }}</span> }</td>
+                <td class="num">{{ row.recall_fp | number: '1.2-2' }}</td>
+                <td class="num">{{ row.precision_fp | number: '1.2-2' }}</td>
+                <td class="num">{{ row.recall_confirmed | number: '1.2-2' }}</td>
+                <td class="num">{{ row.precision_confirmed | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (sweep(); as s) {
+        <div class="panel sweep">
+          <h3>All 16 layer-size trials: paper vs re-run</h3>
+          <svg class="chart" [attr.viewBox]="'0 0 ' + s.W + ' ' + s.H" role="img" aria-labelledby="sw-title">
+            <title id="sw-title">ROC-AUC per trial as reported in the paper and as re-run here</title>
+            @for (v of s.yticks; track v) {
+              <line [attr.x1]="s.L" [attr.x2]="s.W - s.R" [attr.y1]="s.y(v)" [attr.y2]="s.y(v)" class="grid-line" />
+              <text [attr.x]="s.L - 6" [attr.y]="s.y(v) + 4" text-anchor="end">{{ v }}</text>
+            }
+            @for (d of s.rows; track d.trial; let i = $index) {
+              <text [attr.x]="s.x(i)" [attr.y]="s.H - 14" text-anchor="middle">{{ d.trial }}</text>
+              <circle [attr.cx]="s.x(i)" [attr.cy]="s.y(d.paper_roc_auc)" r="4" class="p-paper" />
+              <circle [attr.cx]="s.x(i)" [attr.cy]="s.y(d.roc_auc)" r="4" class="p-ours" />
+            }
+            <path [attr.d]="s.paper" class="l-paper" />
+            <path [attr.d]="s.ours" class="l-ours" />
+            <text [attr.x]="(s.W + s.L) / 2" [attr.y]="s.H" text-anchor="middle">trial number</text>
+          </svg>
+          <div class="legend"><span><i class="k-paper"></i>Paper (Table 3)</span><span><i class="k-ours"></i>Re-run, raw features (mean of 3)</span></div>
+        </div>
+      }
+      <div class="callout coral amb">
+        <strong>Where the paper is ambiguous</strong>
+        <ul>
+          @for (a of r.replication.ambiguities; track a) { <li>{{ a }}</li> }
+        </ul>
+        <p>Assumptions used: {{ r.replication.protocol.join('; ') }}.</p>
+      </div>
+    </section>
+    <p class="note gen">results.json generated {{ r.generated_utc }}.</p>
+  }
+</div>
