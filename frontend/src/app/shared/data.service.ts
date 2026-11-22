@@ -78,3 +78,8 @@ export const FEATURE_LABELS: Record<string, string> = {
   koi_srad: 'Star radius', koi_steff: 'Star temperature', koi_insol: 'Insolation',
   koi_teq: 'Equilibrium temp.', koi_slogg: 'Star log g',
 };
+
+/** Read a resource's value without throwing when it is in an error state. */
+export function valueOf<T>(r: { hasValue(): boolean; value(): T }): T | undefined {
+  return r.hasValue() ? r.value() : undefined;
+}

@@ -59,7 +59,7 @@
             <span class="label">Base paper MLP, re-run here</span><span class="sub">paper reports 0.91 ROC-AUC</span></div>
         }
         @if (prio(); as p) {
-          <div class="panel metric"><span class="value">{{ p.nasa_check.resolved_roc_auc ?? 'n/a' }}</span>
+          <div class="panel metric"><span class="value">{{ p.nasa_check.resolved_roc_auc === undefined ? 'n/a' : (p.nasa_check.resolved_roc_auc | number: '1.3-3') }}</span>
             <span class="label">ROC-AUC on {{ p.nasa_check.resolved_since_snapshot }} candidates NASA has since resolved</span>
             <span class="sub">live archive check, {{ p.nasa_check.queried_utc }}</span></div>
         }

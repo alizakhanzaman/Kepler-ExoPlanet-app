@@ -74,22 +74,27 @@ export class Starfield {
     };
 
     const nebula = () => {
-      // three soft clouds drifting on slow Lissajous paths
+      // Elliptical clouds matching the original look: violet top-left, magenta right,
+      // blue rising from the bottom. rx/ry are fractions of the viewport (like CSS
+      // "ellipse 60% 45%"); colour fades to transparent at 70% of the radius.
       const clouds = [
-        { c: '124,58,237', a: 0.30, x: 0.15, y: 0.12, r: 0.62, fx: 0.011, fy: 0.008 },
-        { c: '219,39,119', a: 0.18, x: 0.88, y: 0.32, r: 0.5, fx: 0.009, fy: 0.012 },
-        { c: '37,99,235', a: 0.26, x: 0.5, y: 1.05, r: 0.75, fx: 0.007, fy: 0.006 },
+        { c: '124,58,237', a: 0.5, x: 0.12, y: 0.08, rx: 0.6, ry: 0.45, fx: 0.011, fy: 0.008 },
+        { c: '219,39,119', a: 0.3, x: 0.92, y: 0.28, rx: 0.5, ry: 0.4, fx: 0.009, fy: 0.012 },
+        { c: '37,99,235', a: 0.45, x: 0.5, y: 1.12, rx: 0.8, ry: 0.5, fx: 0.007, fy: 0.006 },
       ];
-      const m = Math.max(w, h);
       for (const cl of clouds) {
-        const cx = (cl.x + Math.sin(t * cl.fx) * 0.06) * w;
-        const cy = (cl.y + Math.cos(t * cl.fy) * 0.05) * h;
-        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, cl.r * m);
+        const cx = (cl.x + Math.sin(t * cl.fx) * 0.035) * w;
+        const cy = (cl.y + Math.cos(t * cl.fy) * 0.03) * h;
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
         g.addColorStop(0, `rgba(${cl.c},${cl.a})`);
-        g.addColorStop(0.45, `rgba(${cl.c},${cl.a * 0.35})`);
-        g.addColorStop(1, `rgba(${cl.c},0)`);
+        g.addColorStop(0.35, `rgba(${cl.c},${cl.a * 0.55})`);
+        g.addColorStop(0.7, `rgba(${cl.c},0)`);
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(cl.rx * w, cl.ry * h);
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
+        ctx.fillRect(-1.5, -1.5, 3, 3);
+        ctx.restore();
       }
     };
 

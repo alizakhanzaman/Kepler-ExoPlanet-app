@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DataService } from '../../shared/data.service';
+import { DataService, valueOf } from '../../shared/data.service';
 
 @Component({
   selector: 'app-novelty',
@@ -11,8 +11,8 @@ import { DataService } from '../../shared/data.service';
 })
 export class Novelty {
   readonly res = inject(DataService).results;
-  readonly p = computed(() => this.res.value()?.prioritisation);
-  readonly rep = computed(() => this.res.value()?.replication.rows);
+  readonly p = computed(() => valueOf(this.res)?.prioritisation);
+  readonly rep = computed(() => valueOf(this.res)?.replication.rows);
 
   readonly planned = [
     { title: 'Light-curve features', text: 'Add features computed from the Kepler light curves themselves (for example with a feature-extraction library) instead of catalogue values only, and test whether the ranking changes.' },

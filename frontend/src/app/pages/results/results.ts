@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { DataService, FEATURE_LABELS } from '../../shared/data.service';
+import { DataService, FEATURE_LABELS, valueOf } from '../../shared/data.service';
 
 @Component({
   selector: 'app-results',
@@ -14,7 +14,7 @@ export class Results {
 
   /** Heatmap colour: violet (low) -> magenta -> gold (high) over the observed F1 range. */
   readonly heat = computed(() => {
-    const r = this.res.value();
+    const r = valueOf(this.res);
     if (!r) return null;
     const all = r.cv_f1.flatMap((m) => m.f1);
     const lo = Math.min(...all), hi = Math.max(...all);
@@ -29,7 +29,7 @@ export class Results {
   });
 
   readonly cm = computed(() => {
-    const m = this.res.value()?.confusion_matrix;
+    const m = valueOf(this.res)?.confusion_matrix;
     if (!m) return null;
     const max = Math.max(...m.flat());
     const cells = [
@@ -43,7 +43,7 @@ export class Results {
 
   /** Threshold chart geometry: x = threshold 0..1, y = metric 0.4..1. */
   readonly thr = computed(() => {
-    const t = this.res.value()?.thresholds;
+    const t = valueOf(this.res)?.thresholds;
     if (!t) return null;
     const W = 560, H = 260, L = 44, B = 32, T = 12, R = 12;
     const x = (v: number) => L + v * (W - L - R);
@@ -59,14 +59,14 @@ export class Results {
   });
 
   readonly imp = computed(() => {
-    const list = this.res.value()?.importance;
+    const list = valueOf(this.res)?.importance;
     if (!list) return null;
     const max = Math.max(...list.map((d) => d.drop));
     return list.map((d) => ({ ...d, w: (d.drop / max) * 100, label: this.labels[d.feature] ?? d.feature }));
   });
 
   readonly sweep = computed(() => {
-    const s = this.res.value()?.replication.sweep;
+    const s = valueOf(this.res)?.replication.sweep;
     if (!s?.length) return null;
     const W = 560, H = 230, L = 44, B = 34, T = 10, R = 10;
     const n = s.length;

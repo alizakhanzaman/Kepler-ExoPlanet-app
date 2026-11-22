@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { Candidate, DataService } from '../../shared/data.service';
+import { Candidate, DataService, valueOf } from '../../shared/data.service';
 
 type SortKey = 'rank' | 'kepoi_name' | 'koi_prad' | 'koi_insol' | 'koi_period' | 'p_planet' | 'ess' | 'priority';
 
@@ -33,7 +33,7 @@ export class Prioritisation {
   ];
 
   readonly rows = computed<Candidate[]>(() => {
-    const f = this.file.value();
+    const f = valueOf(this.file);
     if (!f) return [];
     const q = this.query().trim().toLowerCase();
     const k = this.sortKey(), dir = this.sortAsc() ? 1 : -1;
@@ -49,7 +49,7 @@ export class Prioritisation {
 
   /** Scatter geometry: x = p_planet, y = ESS (0..1 each). */
   readonly plot = computed(() => {
-    const f = this.file.value();
+    const f = valueOf(this.file);
     if (!f) return null;
     const W = 640, H = 400, L = 50, B = 42, T = 14, R = 16;
     const x = (v: number) => L + v * (W - L - R);

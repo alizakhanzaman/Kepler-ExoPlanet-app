@@ -48,7 +48,7 @@
     <div class="grid two">
       <div class="panel">
         <h3><span class="chip done">Completed</span></h3>
-        @if (res.value(); as r) {
+        @if (res.hasValue() ? res.value() : null; as r) {
           <ol class="status">
             <li><strong>Replication</strong> of the base paper's MLP on its 11 features:
               @if (rep(); as rows) { ROC-AUC {{ rows[1].roc_auc | number: '1.3-3' }} (raw) / {{ rows[2].roc_auc | number: '1.3-3' }} (standardised) vs 0.91 reported. }</li>
