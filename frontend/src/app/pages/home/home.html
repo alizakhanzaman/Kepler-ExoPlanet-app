@@ -1,0 +1,104 @@
+<section class="hero">
+  <div class="page hero-inner">
+    <div class="copy">
+      <p class="eyebrow">Kepler Objects of Interest &middot; machine learning</p>
+      <h1>From finding planets to deciding which ones to look at first</h1>
+      <p class="lede">
+        A gradient-boosted classifier separates real Kepler transit signals from false positives.
+        The new part of this project uses that model to rank 2,248 still-unresolved candidates by how
+        likely they are to be real <em>and</em> how Earth-like they look, so follow-up telescope time
+        can be spent where it matters most.
+      </p>
+      <div class="cta">
+        <a class="btn primary" routerLink="/prioritisation">See the ranked candidates</a>
+        <a class="btn ghost" routerLink="/classifier">Try the classifier</a>
+      </div>
+    </div>
+
+    <figure class="transit panel" aria-labelledby="transit-cap">
+      <svg viewBox="0 0 720 300" class="scene" role="img"
+           aria-label="Animation: a planet crosses its star and the measured brightness dips, then recovers">
+        <defs>
+          <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff7da" />
+            <stop offset="55%" stop-color="#ffd479" />
+            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.85" />
+          </radialGradient>
+        </defs>
+        <circle cx="360" cy="92" r="70" fill="url(#starGlow)" class="star" />
+        <circle cx="360" cy="92" r="16" class="planet" />
+        <g transform="translate(0 168)">
+          <line x1="0" y1="60" x2="720" y2="60" class="base" />
+          <path [attr.d]="curve" class="flux" />
+          <circle r="6" class="marker" />
+          <text x="0" y="128" class="axis-label">time &rarr;</text>
+          <text x="720" y="128" text-anchor="end" class="axis-label">brightness dips ~ (R<tspan baseline-shift="sub" font-size="9">planet</tspan>/R<tspan baseline-shift="sub" font-size="9">star</tspan>)&sup2;</text>
+        </g>
+      </svg>
+      <figcaption id="transit-cap">A transit: when a planet crosses its star, Kepler sees the starlight dip.
+        The classifier reads the shape and size of that dip from the catalogue.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<div class="page">
+  <section aria-labelledby="metrics-h">
+    <h2 id="metrics-h" class="sr-only">Headline results</h2>
+    @if (results.isLoading()) {
+      <p class="state" role="status">Loading results&hellip;</p>
+    } @else if (results.error()) {
+      <p class="state error" role="alert">Could not load results.json. Try reloading the page.</p>
+    } @else if (lgb(); as m) {
+      <div class="grid four">
+        <div class="panel metric"><span class="value">{{ m.roc_auc | number: '1.3-3' }}</span>
+          <span class="label">Hold-out ROC-AUC</span><span class="sub">95% CI {{ m.roc_auc_ci?.[0] }}&ndash;{{ m.roc_auc_ci?.[1] }}</span></div>
+        <div class="panel metric"><span class="value">{{ m.f1 | number: '1.3-3' }}</span>
+          <span class="label">Hold-out F1 (CONFIRMED)</span><span class="sub">95% CI {{ m.f1_ci?.[0] }}&ndash;{{ m.f1_ci?.[1] }}</span></div>
+        @if (rep(); as r) {
+          <div class="panel metric"><span class="value">{{ r.roc_auc | number: '1.3-3' }}</span>
+            <span class="label">Base paper MLP, re-run here</span><span class="sub">paper reports 0.91 ROC-AUC</span></div>
+        }
+        @if (prio(); as p) {
+          <div class="panel metric"><span class="value">{{ p.nasa_check.resolved_roc_auc ?? 'n/a' }}</span>
+            <span class="label">ROC-AUC on {{ p.nasa_check.resolved_since_snapshot }} candidates NASA has since resolved</span>
+            <span class="sub">live archive check, {{ p.nasa_check.queried_utc }}</span></div>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="section">
+    <h2>What this project does</h2>
+    <div class="grid three">
+      <a class="panel step" routerLink="/results">
+        <span class="num">1</span>
+        <h3>Replicate and benchmark</h3>
+        <p>The base paper's MLP is re-run on the same 11 features, then compared with four other model
+          families under repeated cross-validation and a held-out test set with bootstrap intervals.</p>
+        <span class="more">Results &rarr;</span>
+      </a>
+      <a class="panel step" routerLink="/novelty">
+        <span class="num">2</span>
+        <h3>Go from detection to prioritisation</h3>
+        <p>Every unresolved candidate gets a planet probability and an ESI-inspired Earth Similarity
+          Score. Their product, plus a Pareto front, gives a follow-up shortlist.</p>
+        <span class="more">Novelty &rarr;</span>
+      </a>
+      <a class="panel step" routerLink="/pipeline">
+        <span class="num">3</span>
+        <h3>Ship it as tested software</h3>
+        <p>A Flask API serves the model, this Angular site is the interface, and GitHub Actions test,
+          build and deploy every push to GitHub Pages.</p>
+        <span class="more">Pipeline &rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="callout">
+      This is a teaching and research prototype. It works from catalogue values, not raw light curves,
+      and the Earth Similarity Score measures Earth-likeness only, not habitability.
+      <a routerLink="/about">Read the limitations</a>.
+    </div>
+  </section>
+</div>

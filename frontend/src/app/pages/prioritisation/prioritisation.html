@@ -1,0 +1,171 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">The novelty, in practice</p>
+    <h1>Prioritised candidates</h1>
+    <p class="lede">Unresolved Kepler CANDIDATE signals ranked by <code>p_planet &times; ESS</code>. Produced by
+      <code>research/prioritise_candidates.py</code> with the deployed model. ESS is ESI-inspired and measures
+      Earth-likeness in radius and insolation only, not habitability.</p>
+  </header>
+
+  @if (file.isLoading()) {
+    <p class="state" role="status">Loading candidates&hellip;</p>
+  } @else if (file.error()) {
+    <p class="state error" role="alert">Could not load candidates.json.</p>
+  } @else if (file.value(); as f) {
+    <section class="grid four" aria-label="Summary">
+      <div class="panel metric"><span class="value">{{ f.n_candidates | number }}</span><span class="label">Candidates scored</span></div>
+      <div class="panel metric"><span class="value">{{ f.n_scored_ess | number }}</span><span class="label">With an ESS</span><span class="sub">{{ f.n_dropped_missing_prad_or_insol }} dropped: radius or insolation missing</span></div>
+      <div class="panel metric"><span class="value">{{ f.p_planet['n_ge_0_9'] | number }}</span><span class="label">p_planet &ge; 0.9</span><span class="sub">{{ f.p_planet['n_ge_0_5'] | number }} at &ge; 0.5</span></div>
+      <div class="panel metric"><span class="value">{{ f.n_pareto }}</span><span class="label">On the Pareto front</span><span class="sub">no candidate beats them on both axes</span></div>
+    </section>
+
+    <section class="section" aria-labelledby="sc-h">
+      <h2 id="sc-h">Planet probability vs Earth similarity</h2>
+      @if (plot(); as g) {
+        <div class="panel">
+          <svg class="chart" [attr.viewBox]="'0 0 ' + g.W + ' ' + g.H" role="img" aria-labelledby="sc-title sc-desc">
+            <title id="sc-title">Scatter of {{ f.n_scored_ess }} candidates, planet probability against Earth Similarity Score</title>
+            <desc id="sc-desc">Most candidates have low ESS. {{ f.n_pareto }} Pareto-optimal candidates are highlighted in gold and joined by a line.</desc>
+            @for (v of g.ticks; track v) {
+              <line [attr.x1]="g.x(v)" [attr.x2]="g.x(v)" [attr.y1]="g.T" [attr.y2]="g.H - g.B" class="grid-line" />
+              <line [attr.x1]="g.L" [attr.x2]="g.W - g.R" [attr.y1]="g.y(v)" [attr.y2]="g.y(v)" class="grid-line" />
+              <text [attr.x]="g.x(v)" [attr.y]="g.H - g.B + 18" text-anchor="middle">{{ v }}</text>
+              <text [attr.x]="g.L - 8" [attr.y]="g.y(v) + 4" text-anchor="end">{{ v }}</text>
+            }
+            @for (c of g.iso; track c.c) {
+              <path [attr.d]="c.d" class="iso" />
+              <text [attr.x]="c.lx" [attr.y]="c.ly" text-anchor="end" class="iso-label">priority {{ c.c }}</text>
+            }
+            <g class="dots">
+              @for (p of g.pts; track $index) { <circle [attr.cx]="p.cx" [attr.cy]="p.cy" r="2.2" /> }
+            </g>
+            <path [attr.d]="g.step" class="front" />
+            @for (c of g.front; track c.kepoi_name) {
+              <circle [attr.cx]="g.x(c.p_planet)" [attr.cy]="g.y(c.ess)" r="5.5" class="pareto">
+                <title>{{ c.kepoi_name }}: p {{ c.p_planet }}, ESS {{ c.ess }}</title>
+              </circle>
+            }
+            <text [attr.x]="(g.W + g.L) / 2" [attr.y]="g.H - 4" text-anchor="middle" class="axis-title">p_planet (model probability of CONFIRMED)</text>
+            <text x="14" [attr.y]="(g.H - g.B) / 2" text-anchor="middle" class="axis-title" [attr.transform]="'rotate(-90 14 ' + (g.H - g.B) / 2 + ')'">Earth Similarity Score</text>
+          </svg>
+          <div class="legend"><span><i class="k-dot"></i>Candidate</span><span><i class="k-par"></i>Pareto front</span><span><i class="k-iso"></i>Equal priority curves</span></div>
+        </div>
+      }
+    </section>
+
+    <section class="section" aria-labelledby="tb-h">
+      <h2 id="tb-h">Top {{ f.top.length }} by priority</h2>
+      <div class="panel filters" role="search" aria-label="Filter candidates">
+        <label>Search KOI or Kepler name
+          <input type="search" [value]="query()" (input)="query.set($any($event.target).value)" placeholder="e.g. K03034" />
+        </label>
+        <label>Min p_planet: <strong>{{ minP() | number: '1.2-2' }}</strong>
+          <input type="range" min="0" max="1" step="0.05" [value]="minP()" (input)="minP.set(num($event))" />
+        </label>
+        <label>Min ESS: <strong>{{ minEss() | number: '1.2-2' }}</strong>
+          <input type="range" min="0" max="1" step="0.05" [value]="minEss()" (input)="minEss.set(num($event))" />
+        </label>
+        <label class="check"><input type="checkbox" [checked]="paretoOnly()" (change)="paretoOnly.set($any($event.target).checked)" /> Pareto front only</label>
+        <button type="button" class="btn ghost" (click)="reset()">Reset</button>
+      </div>
+      <p class="note" aria-live="polite">{{ rows().length }} of {{ f.top.length }} candidates match.</p>
+      @if (rows().length === 0) {
+        <p class="state">No candidates match these filters. Lower the thresholds or press Reset.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                @for (col of columns; track col.key) {
+                  <th scope="col" [class.num]="col.num" [attr.aria-sort]="ariaSort(col.key)">
+                    <button type="button" class="sort" (click)="sortBy(col.key)">
+                      {{ col.label }}<span aria-hidden="true">{{ sortKey() === col.key ? (sortAsc() ? ' ▲' : ' ▼') : '' }}</span>
+                    </button>
+                  </th>
+                }
+                <th scope="col">NASA today</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of visible(); track c.kepoi_name) {
+                <tr>
+                  <td class="num">{{ c.rank }}</td>
+                  <td>{{ c.kepoi_name }}@if (c.pareto) { <span class="chip planned">Pareto</span> }
+                    @if (c.kepler_name) { <div class="note">{{ c.kepler_name }}</div> }</td>
+                  <td class="num">{{ c.koi_prad | number: '1.2-2' }}</td>
+                  <td class="num">{{ c.koi_insol | number: '1.2-2' }}</td>
+                  <td class="num">{{ c.koi_period === null ? 'n/a' : (c.koi_period | number: '1.1-1') }}</td>
+                  <td class="num">{{ c.p_planet | number: '1.3-3' }}</td>
+                  <td class="num">{{ c.ess | number: '1.3-3' }}</td>
+                  <td class="num strong">{{ c.priority | number: '1.3-3' }}</td>
+                  <td><span class="status" [class.planet-text]="c.nasa_now === 'CONFIRMED'" [class.fp-text]="c.nasa_now === 'FALSE POSITIVE'">{{ c.nasa_now ?? 'not checked' }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (rows().length > pageSize()) {
+          <button type="button" class="btn ghost more" (click)="pageSize.set(pageSize() + 25)">Show 25 more</button>
+        }
+      }
+    </section>
+
+    <section class="section" aria-labelledby="sen-h">
+      <h2 id="sen-h">Is the ranking robust to the weighting?</h2>
+      <div class="table-wrap">
+        <table>
+          <caption>Compared with the default p&middot;ESS ranking over all {{ f.n_scored_ess | number }} scored candidates.</caption>
+          <thead><tr><th scope="col">Alternative score</th><th scope="col" class="num">Spearman &rho;</th><th scope="col" class="num">Top-20 overlap</th></tr></thead>
+          <tbody>
+            <tr><td>p &middot; ESS&sup2; (favour Earth-likeness)</td><td class="num">{{ f.sensitivity['p_x_ess2'].spearman }}</td><td class="num">{{ f.sensitivity['p_x_ess2'].top20_overlap }} / 20</td></tr>
+            <tr><td>p&sup2; &middot; ESS (favour confidence)</td><td class="num">{{ f.sensitivity['p2_x_ess'].spearman }}</td><td class="num">{{ f.sensitivity['p2_x_ess'].top20_overlap }} / 20</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="nasa-h">
+      <h2 id="nasa-h">Check against the live NASA Exoplanet Archive</h2>
+      @if (f.nasa_check.ok && f.nasa_check.by_probability_rank; as g) {
+        <p class="section-intro">The Kaggle file is an older snapshot. On {{ f.nasa_check.queried_utc }} the archive's KOI cumulative table was
+          queried; {{ f.nasa_check.resolved_since_snapshot }} of the {{ f.n_candidates | number }} candidates have since been resolved. This tests the
+          <em>probability</em> ranking only: ESS has no ground truth.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Group (by p_planet)</th><th scope="col" class="num">n</th><th scope="col" class="num">Now CONFIRMED</th><th scope="col" class="num">Now FALSE POSITIVE</th><th scope="col" class="num">Still CANDIDATE</th><th scope="col" class="num">Confirmed rate</th></tr></thead>
+            <tbody>
+              @for (k of ['top20', 'top50', 'top100', 'bottom100', 'all_candidates']; track k) {
+                <tr>
+                  <td>{{ k === 'all_candidates' ? 'All candidates' : k === 'bottom100' ? 'Bottom 100' : 'Top ' + k.slice(3) }}</td>
+                  <td class="num">{{ g[k]['n'] }}</td>
+                  <td class="num planet-text">{{ g[k]['CONFIRMED'] ?? 0 }}</td>
+                  <td class="num fp-text">{{ g[k]['FALSE POSITIVE'] ?? 0 }}</td>
+                  <td class="num">{{ g[k]['CANDIDATE'] ?? 0 }}</td>
+                  <td class="num">{{ g[k]['confirmed_rate'] * 100 | number: '1.1-1' }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (f.nasa_check.informative) {
+          <p class="callout teal outcome">On the {{ f.nasa_check.resolved_since_snapshot }} resolved candidates, p_planet separates confirmed from false positives with
+            ROC-AUC <strong>{{ f.nasa_check.resolved_roc_auc }}</strong> and PR-AUC <strong>{{ f.nasa_check.resolved_pr_auc }}</strong>
+            (base rate {{ (f.nasa_check.resolved_confirmed_share ?? 0) * 100 | number: '1.1-1' }}% confirmed). Caveat: these resolutions were not random; NASA's own
+            vetting uses related signals, so this is supportive evidence, not an independent test.</p>
+        } @else {
+          <p class="callout outcome">Too few candidates have been resolved for this check to be informative.</p>
+        }
+      } @else {
+        <p class="callout coral">The archive query failed, so the ranking could not be checked. Attempts:</p>
+      }
+      <details class="attempts">
+        <summary>Query attempts</summary>
+        <ul>
+          @for (a of f.nasa_check.attempts; track $index) {
+            <li><code>{{ a.method }}</code>: {{ a.ok ? 'ok, ' + a.rows + ' rows' : a.error }}</li>
+          }
+        </ul>
+      </details>
+    </section>
+  }
+</div>

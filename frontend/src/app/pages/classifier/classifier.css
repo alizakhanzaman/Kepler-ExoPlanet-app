@@ -1,0 +1,37 @@
+.layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 28px; align-items: start; margin-top: 24px; }
+.sheet { padding: 26px 30px 30px; }
+fieldset { border: 0; border-top: 1px solid var(--rule); margin: 18px 0 0; padding: 14px 0 0; min-width: 0; }
+legend { font-family: var(--serif); font-size: 1.15rem; font-weight: 700; padding: 0 12px 0 0; color: var(--gold); }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin-top: 8px; }
+label { display: grid; gap: 6px; }
+.name { font-weight: 600; font-size: .94rem; }
+.unit { font-weight: 400; color: var(--soft); margin-left: 4px; }
+input { width: 100%; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.scope { position: sticky; top: calc(var(--nav-h) + 20px); }
+.scope h2 { font-size: 1.2rem; }
+.curve { display: block; width: 100%; height: auto; }
+.baseline { stroke: rgba(167, 139, 250, .4); stroke-dasharray: 4 5; }
+.flux { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linejoin: round; filter: drop-shadow(0 0 5px rgba(255, 212, 121, .8)); }
+.flux.flat { stroke: var(--soft); filter: none; }
+.verdict { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--rule); min-height: 220px; }
+.tag { margin: 0 0 8px; }
+.call { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin: 0 0 14px; font-weight: 700; }
+.meter { position: relative; height: 10px; background: rgba(167, 139, 250, .2); border-radius: 5px; overflow: hidden; }
+.fill { height: 100%; transition: width .6s ease-out; }
+.fill.planet { background: var(--planet); }
+.fill.fp { background: var(--fp); }
+.tick { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #fff; }
+.prob { margin: 12px 0 8px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.prob strong { font-family: var(--serif); font-size: 1.6rem; }
+.err { color: var(--fp); font-weight: 600; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.card { width: 100%; text-align: left; font: inherit; color: var(--ink); cursor: pointer; display: grid; gap: 4px; transition: border-color .2s, transform .2s; }
+.card:hover { border-color: rgba(255, 212, 121, .6); transform: translateY(-2px); }
+.kname { font-family: var(--serif); font-size: 1.15rem; font-weight: 700; color: #fff; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .scope { position: static; }
+  .sheet { padding: 22px 18px 26px; }
+}
+@media (max-width: 520px) { .fields { grid-template-columns: 1fr; } }

@@ -1,0 +1,4 @@
+.status { padding-left: 20px; margin: 8px 0 20px; display: grid; gap: 10px; color: var(--soft); }
+.status strong { color: #fff; }
+.note-ess { margin-top: 22px; }
+td:first-child { font-weight: 650; color: #fff; white-space: nowrap; }

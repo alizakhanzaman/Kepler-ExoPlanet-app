@@ -1,0 +1,53 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">Literature review</p>
+    <h1>Literature</h1>
+    <p class="lede">{{ total }} references, grouped by theme. Each one was checked against its DOI record (Crossref),
+      the publisher or proceedings page, or the PDF itself before it was listed here.</p>
+  </header>
+
+  <nav class="panel tight toc" aria-label="Themes">
+    <ul class="clean">
+      @for (g of groups; track g.theme; let i = $index) {
+        <li><a [href]="'#/literature'" (click)="$event.preventDefault(); jump('t' + i)">{{ g.theme }}</a></li>
+      }
+      <li><a [href]="'#/literature'" (click)="$event.preventDefault(); jump('gap')">Research gap</a></li>
+    </ul>
+  </nav>
+
+  @for (g of groups; track g.theme; let i = $index) {
+    <section class="section" [attr.aria-labelledby]="'t' + i">
+      <h2 [id]="'t' + i" tabindex="-1">{{ g.theme }}</h2>
+      <ol class="clean refs">
+        @for (r of g.refs; track r.id) {
+          <li class="panel tight">
+            <p class="cite"><strong>{{ r.authors }}</strong> ({{ r.year }}). <em>{{ r.title }}</em>. {{ r.venue }}.
+              @if (r.doi) { <a [href]="'https://doi.org/' + r.doi" target="_blank" rel="noopener">doi:{{ r.doi }}</a> }
+              @else if (r.url) { <a [href]="r.url" target="_blank" rel="noopener">Link</a> }
+            </p>
+            <p class="ann">{{ r.note }}</p>
+          </li>
+        }
+      </ol>
+    </section>
+  }
+
+  <section class="section" aria-labelledby="gap">
+    <h2 id="gap" tabindex="-1">Research gap</h2>
+    <p class="section-intro">What the base paper does, what the wider literature already offers, and what this project adds.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Aspect</th><th scope="col">Base paper</th><th scope="col">Literature</th><th scope="col">This work</th></tr></thead>
+        <tbody>
+          @for (row of gaps; track row.aspect) {
+            <tr><td class="aspect">{{ row.aspect }}</td><td>{{ row.paper }}</td><td>{{ row.lit }}</td><td class="ours">{{ row.ours }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="callout note-esi">Honest scope: the similarity formula is not new. A radius-and-flux ESI is already used by the
+      Planetary Habitability Laboratory for known exoplanets. What is new here is combining it with the classifier's
+      probability (not yet calibrated; see Planned) to rank <em>unresolved</em> Kepler candidates, reporting the Pareto front and weighting
+      sensitivity, and checking the ranking against the archive.</p>
+  </section>
+</div>

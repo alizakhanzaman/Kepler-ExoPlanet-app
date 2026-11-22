@@ -1,125 +1,47 @@
-<div class="page">
-  <header class="masthead" style="max-width:none;">
-    <h1>Kepler Exoplanet Classifier</h1>
-    <p class="lede" style="font-size:1.25rem;font-weight:600;color:#ffffff;">
-      Is this Kepler signal a real planet or a false positive?
-    </p>
-    <p class="lede">
-      Enter what Kepler measured for a candidate. A LightGBM model trained on
-      confirmed planets and false positives estimates which one it is.
-    </p>
-    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:20px;">
-      <span style="background:rgba(139,92,246,.25);border:1px solid #a78bfa;color:#ffffff;padding:8px 16px;border-radius:999px;font-weight:600;">Model: LightGBM</span>
-      <span style="background:rgba(139,92,246,.25);border:1px solid #a78bfa;color:#ffffff;padding:8px 16px;border-radius:999px;font-weight:600;">11 input features</span>
-      <span style="background:rgba(139,92,246,.25);border:1px solid #a78bfa;color:#ffffff;padding:8px 16px;border-radius:999px;font-weight:600;">Test F1: 0.893</span>
-      <span style="background:rgba(139,92,246,.25);border:1px solid #a78bfa;color:#ffffff;padding:8px 16px;border-radius:999px;font-weight:600;">ROC-AUC: 0.980</span>
-    </div>
-  </header>
+<app-starfield />
+<a class="skip-link" href="#main" (click)="$event.preventDefault(); main.focus()">Skip to content</a>
 
-  @if (deployedStatic) {
-    <p class="static-note" role="note">
-      This public page shows the form only. Classification runs on a local Flask
-      server, so the button is turned off here.
-    </p>
-  }
-
-  <div class="layout">
-    <form class="sheet" (ngSubmit)="submit()" aria-describedby="blank-help">
-      <p id="blank-help" class="help">
-        Every field is optional. A blank field is filled with the training median.
-      </p>
-
-      @for (group of groups; track group.name) {
-        <fieldset>
-          <legend>{{ group.name }}</legend>
-          <div class="fields">
-            @for (field of group.fields; track field.name) {
-              <label>
-                <span class="name">{{ field.label }}
-                  @if (field.unit) { <span class="unit">({{ field.unit }})</span> }
-                </span>
-                @if (field.kind === 'number') {
-                  <input type="number" step="any" inputmode="decimal"
-                         [name]="field.name" [placeholder]="field.hint ?? ''"
-                         [min]="field.min ?? null" [max]="field.max ?? null"
-                         [(ngModel)]="values[field.name]" [required]="field.required" />
-                } @else {
-                  <select [name]="field.name" [(ngModel)]="values[field.name]"
-                          [required]="field.required">
-                    <option [ngValue]="null">Select a value</option>
-                    @for (option of field.options ?? []; track option) {
-                      <option [ngValue]="option">{{ option }}</option>
-                    }
-                  </select>
-                }
-              </label>
-            }
-          </div>
-        </fieldset>
-      }
-
-      <div class="actions">
-        <button type="submit" class="primary" [disabled]="loading() || deployedStatic">
-          {{ loading() ? 'Classifying...' : 'Run classifier' }}
-        </button>
-        <button type="button" class="text" (click)="loadSample()">Load a sample planet</button>
-        <button type="button" class="text" (click)="clearAll()">Clear all</button>
-      </div>
-    </form>
-
-    <aside class="scope" aria-label="Transit preview and result">
-      <h2>Transit preview</h2>
-
-      <svg class="curve" role="img"
-           [attr.viewBox]="transit().ready ? '0 0 640 190' : '0 0 640 80'"
-           [attr.aria-label]="transit().ready
-             ? 'Starlight dipping three times as the planet crosses the star'
-             : 'Flat starlight line: enter period, duration and depth to preview the transit'">
-        <line x1="0" y1="40" x2="640" y2="40" class="baseline" />
-        @if (transit(); as t) {
-          @if (t.ready) {
-            <path [attr.d]="t.path" class="flux" />
-          } @else {
-            <path d="M0 40 L640 40" class="flux flat" />
-          }
-        }
+<header class="topbar">
+  <nav class="bar" aria-label="Main">
+    <a class="brand" routerLink="/" aria-label="Kepler Exoplanet Prioritiser, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" class="logo">
+        <circle cx="16" cy="16" r="9" class="logo-star" />
+        <circle cx="24.5" cy="11" r="3.2" class="logo-planet" />
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" class="logo-orbit" />
       </svg>
-      <p class="caption">
-        @if (transit().ready) {
-          Three transits, spaced by the orbital period. Dip width follows duration
-          &divide; period; depth is drawn on a log scale.
-        } @else {
-          Enter orbital period, transit duration and transit depth to see the dip.
-        }
-      </p>
+      <span>Kepler <em>Prioritiser</em></span>
+    </a>
+    <button type="button" class="menu-btn" (click)="toggleMenu()"
+            [attr.aria-expanded]="menuOpen()" aria-controls="nav-links">
+      <span class="sr-only">{{ menuOpen() ? 'Close menu' : 'Open menu' }}</span>
+      <span class="burger" [class.open]="menuOpen()" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    <ul id="nav-links" class="links" [class.open]="menuOpen()">
+      @for (item of nav; track item.path) {
+        <li>
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page"
+             [routerLinkActiveOptions]="{ exact: item.exact }">{{ item.label }}</a>
+        </li>
+      }
+    </ul>
+  </nav>
+</header>
 
-      <div class="verdict" aria-live="polite">
-        @if (error()) {
-          <p class="error" role="alert">{{ error() }}</p>
-        } @else if (result(); as r) {
-          <h2>Classification</h2>
-          <p class="call" [class.planet]="isPlanet(r)" [class.fp]="!isPlanet(r)">
-            {{ isPlanet(r) ? 'Likely a confirmed planet' : 'Likely a false positive' }}
-          </p>
-          <div class="meter" role="img" [attr.aria-label]="'Planet probability ' + percent(r) + ' percent'">
-            <div class="fill" [style.width.%]="percent(r)"
-                 [class.planet]="isPlanet(r)" [class.fp]="!isPlanet(r)"></div>
-            <div class="tick" title="50% decision line"></div>
-          </div>
-          <p class="prob">
-            <strong>{{ percent(r) }}%</strong> planet probability
-            <span class="raw">Model output: {{ r.prediction }}</span>
-          </p>
-          <p class="fine">{{ r.disclaimer }}</p>
-        } @else {
-          <h2>Classification</h2>
-          <p class="empty">Press Run classifier to see the model's verdict here.</p>
-        }
-      </div>
-    </aside>
+<main id="main" #main tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <div class="foot">
+    <div>
+      <strong>Kepler Exoplanet Prioritiser</strong>
+      <p>Research prototype by Aliza Zaman (BSSE). Flask + LightGBM backend, Angular frontend, GitHub Actions CI/CD.</p>
+    </div>
+    <ul class="clean foot-links" aria-label="Footer">
+      <li><a [href]="repo" target="_blank" rel="noopener">Source on GitHub</a></li>
+      <li><a routerLink="/literature">References</a></li>
+      <li><a routerLink="/about">Limitations and ethics</a></li>
+    </ul>
   </div>
-  <footer style="margin-top:48px;padding-top:20px;border-top:1px solid rgba(167,139,250,.4);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;color:#c9c3ee;">
-    <span><strong>Built by Aliza Zaman</strong> &bull; Full-stack ML project: Flask + Angular + GitHub Actions</span>
-    <a style="color:#ffd479;" href="https://github.com/alizakhanzaman/Kepler-ExoPlanet-app" target="_blank" rel="noopener">View source on GitHub</a>
-  </footer>
-</div>
+  <p class="fine">Data: NASA Kepler cumulative KOI table (Kaggle snapshot) and the NASA Exoplanet Archive. Not a validated astronomical classification. &copy; {{ year }}</p>
+</footer>

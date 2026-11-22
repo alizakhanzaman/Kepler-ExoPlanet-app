@@ -1,0 +1,26 @@
+.dots circle { fill: rgba(167, 139, 250, .55); }
+.front { fill: none; stroke: var(--gold); stroke-width: 2; stroke-dasharray: 5 4; }
+.pareto { fill: var(--gold); stroke: #05030f; stroke-width: 1.5; filter: drop-shadow(0 0 6px rgba(255, 212, 121, .9)); }
+.iso { fill: none; stroke: rgba(94, 234, 212, .35); stroke-width: 1.2; }
+.chart .iso-label { fill: rgba(94, 234, 212, .8); font-size: 11px; }
+.chart .axis-title { fill: var(--ink); font-size: 13px; }
+.k-dot { background: rgba(167, 139, 250, .7); border-radius: 50% !important; }
+.k-par { background: var(--gold); border-radius: 50% !important; }
+.k-iso { background: rgba(94, 234, 212, .6); height: 2px !important; vertical-align: 3px !important; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-end; margin-bottom: 12px; }
+.filters label { display: grid; gap: 6px; font-size: .9rem; }
+.filters input[type='search'] { width: 220px; }
+.filters input[type='range'] { width: 180px; accent-color: var(--gold); padding: 0; }
+.filters .check { display: flex; align-items: center; gap: 8px; }
+.filters .check input { accent-color: var(--gold); width: 18px; height: 18px; }
+.sort { background: none; border: 0; color: inherit; font: inherit; font-weight: 700; cursor: pointer; padding: 0; white-space: nowrap; }
+.sort:hover { color: #fff; }
+td .chip { margin-left: 6px; font-size: .7rem; padding: 1px 8px; }
+td.strong { color: #fff; font-weight: 700; }
+.status { font-size: .85rem; font-weight: 600; }
+.more { margin-top: 14px; }
+.outcome { margin-top: 18px; }
+.attempts { margin-top: 14px; color: var(--soft); font-size: .88rem; }
+.attempts summary { cursor: pointer; color: var(--gold); }
+.attempts code { background: none; }

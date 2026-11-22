@@ -1,0 +1,31 @@
+.hero-inner { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 40px; align-items: center; padding-top: 64px; padding-bottom: 24px; }
+.copy h1 { margin-bottom: 18px; }
+.copy em { color: var(--gold); font-style: normal; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.transit { margin: 0; padding: 18px 18px 14px; }
+.scene { display: block; width: 100%; height: auto; }
+.star { filter: drop-shadow(0 0 22px rgba(255, 212, 121, .75)); }
+.planet { fill: #0b0720; stroke: rgba(94, 234, 212, .7); stroke-width: 1.5; animation: cross 7s linear infinite; }
+.base { stroke: rgba(167, 139, 250, .35); stroke-dasharray: 4 6; }
+.flux { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(255, 212, 121, .7)); }
+.marker {
+  fill: var(--planet); filter: drop-shadow(0 0 6px rgba(94, 234, 212, .9));
+  offset-path: path('M0 60 L250 60 C268 60 272 104 292 104 L428 104 C448 104 452 60 470 60 L720 60');
+  offset-rotate: 0deg; animation: trace 7s linear infinite;
+}
+.axis-label { fill: var(--muted); font-size: 13px; }
+figcaption { color: var(--soft); font-size: .88rem; margin-top: 8px; }
+/* planet x and marker x move together: star spans x 290..430, curve dip spans 270..450 */
+@keyframes cross { from { transform: translateX(-380px); } to { transform: translateX(380px); } }
+@keyframes trace { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .planet { animation: none; transform: none; }
+  .marker { animation: none; offset-distance: 50%; }
+}
+
+.step { display: flex; flex-direction: column; text-decoration: none; color: var(--ink); transition: transform .2s, box-shadow .2s, border-color .2s; }
+.step:hover { transform: translateY(-3px); border-color: rgba(255, 212, 121, .55); box-shadow: 0 0 48px rgba(219, 39, 119, .25); color: var(--ink); }
+.step p { color: var(--soft); flex: 1; }
+.num { font-family: var(--serif); font-size: 2rem; color: var(--gold); line-height: 1; margin-bottom: 8px; }
+.more { color: var(--gold); font-weight: 650; }
+@media (max-width: 900px) { .hero-inner { grid-template-columns: 1fr; padding-top: 40px; } }

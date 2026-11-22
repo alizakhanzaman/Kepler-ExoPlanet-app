@@ -1,0 +1,113 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">Live model</p>
+    <h1>Classifier</h1>
+    <p class="lede">Enter what Kepler measured for a signal. The deployed LightGBM pipeline (median imputer,
+      scaler, LightGBM) estimates whether it is a confirmed planet or a false positive.</p>
+  </header>
+
+  @if (deployedStatic) {
+    <p class="callout" role="note">
+      You are on the public GitHub Pages site, which has no Python server. Live prediction works when you
+      run the Flask API and the Angular dev server on your own computer (see the README). Below you can load
+      <strong>precomputed</strong> predictions that the real model made on real hold-out rows.
+    </p>
+  }
+
+  <div class="layout">
+    <form class="panel sheet" (ngSubmit)="submit()" aria-describedby="blank-help">
+      <p id="blank-help" class="note">Every field is optional. A blank field is filled with the training median.</p>
+      @for (group of groups; track group.name) {
+        <fieldset>
+          <legend>{{ group.name }}</legend>
+          <div class="fields">
+            @for (field of group.fields; track field.name) {
+              <label>
+                <span class="name">{{ field.label }}@if (field.unit) { <span class="unit">({{ field.unit }})</span> }</span>
+                <input type="number" step="any" inputmode="decimal" [name]="field.name"
+                       [placeholder]="field.hint ?? ''" [(ngModel)]="values[field.name]" />
+              </label>
+            }
+          </div>
+        </fieldset>
+      }
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="loading()">
+          {{ loading() ? 'Classifying…' : 'Run classifier' }}
+        </button>
+        <button type="button" class="btn ghost" (click)="clearAll()">Clear all</button>
+      </div>
+    </form>
+
+    <aside class="panel scope" aria-label="Transit preview and result">
+      <h2>Transit preview</h2>
+      <svg class="curve" role="img" [attr.viewBox]="transit().ready ? '0 0 640 190' : '0 0 640 80'"
+           [attr.aria-label]="transit().ready ? 'Starlight dipping three times as the planet crosses the star'
+             : 'Flat starlight line: enter period, duration and depth to preview the transit'">
+        <line x1="0" y1="40" x2="640" y2="40" class="baseline" />
+        @if (transit(); as t) {
+          @if (t.ready) { <path [attr.d]="t.path" class="flux" /> }
+          @else { <path d="M0 40 L640 40" class="flux flat" /> }
+        }
+      </svg>
+      <p class="note">
+        @if (transit().ready) { Three transits spaced by the period; dip width follows duration &divide; period, depth is on a log scale. }
+        @else { Enter orbital period, transit duration and transit depth to see the dip. }
+      </p>
+
+      <div id="verdict" class="verdict" aria-live="polite">
+        <h2>Classification</h2>
+        @if (error()) {
+          <p class="err" role="alert">{{ error() }}</p>
+        } @else if (verdict(); as v) {
+          <p class="tag">
+            @if (v.source === 'precomputed') { <span class="chip planned">Precomputed, not live</span> }
+            @else { <span class="chip done">Live from Flask</span> }
+          </p>
+          <p class="call" [class.planet-text]="isPlanet(v)" [class.fp-text]="!isPlanet(v)">
+            {{ isPlanet(v) ? 'Likely a confirmed planet' : 'Likely a false positive' }}
+          </p>
+          <div class="meter" role="img" [attr.aria-label]="'Planet probability ' + percent(v) + ' percent'">
+            <div class="fill" [style.width.%]="percent(v)" [class.planet]="isPlanet(v)" [class.fp]="!isPlanet(v)"></div>
+            <div class="tick"></div>
+          </div>
+          <p class="prob"><strong>{{ percent(v) }}%</strong> planet probability <span class="note">50% line marked</span></p>
+          @if (v.example; as ex) {
+            <p class="note">{{ ex.kepoi_name }}{{ ex.kepler_name ? ' (' + ex.kepler_name + ')' : '' }} &middot;
+              catalogue label <strong>{{ ex.true_label }}</strong> &middot;
+              <span [class.planet-text]="ex.correct" [class.fp-text]="!ex.correct">{{ ex.correct ? 'model correct' : 'model wrong' }}</span></p>
+          }
+          @if (v.disclaimer) { <p class="note">{{ v.disclaimer }}</p> }
+        } @else {
+          <p class="note">Run the classifier or load an example to see a verdict here.</p>
+        }
+      </div>
+    </aside>
+  </div>
+
+  <section class="section" aria-labelledby="gallery-h">
+    <h2 id="gallery-h">Precomputed examples</h2>
+    <p class="section-intro">Real hold-out KOIs from the notebook's 80/20 split, scored offline by the deployed model
+      (<code>research/make_examples.py</code>). Two of the eight are deliberate misses, so you can see where the model fails.</p>
+    @if (examples.isLoading()) {
+      <p class="state" role="status">Loading examples&hellip;</p>
+    } @else if (examples.error()) {
+      <p class="state error" role="alert">Could not load the example gallery.</p>
+    } @else if (examples.value(); as file) {
+      <ul class="clean gallery">
+        @for (ex of file.examples; track ex.kepoi_name) {
+          <li>
+            <button type="button" class="panel tight card" (click)="useExample(ex)"
+                    [attr.aria-label]="'Load ' + ex.kepoi_name + ', catalogue label ' + ex.true_label">
+              <span class="kname">{{ ex.kepoi_name }}</span>
+              <span class="note">{{ ex.kepler_name ?? 'no Kepler name' }}</span>
+              <span>Label: <strong [class.planet-text]="ex.true_label === 'CONFIRMED'" [class.fp-text]="ex.true_label !== 'CONFIRMED'">{{ ex.true_label }}</strong></span>
+              <span>p(planet) {{ ex.confirmed_probability | number: '1.3-3' }}
+                @if (!ex.correct) { <span class="chip fail">miss</span> }</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

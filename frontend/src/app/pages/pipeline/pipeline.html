@@ -1,0 +1,78 @@
+<div class="page">
+  <header class="page-head">
+    <p class="eyebrow">Engineering</p>
+    <h1>Pipeline</h1>
+    <p class="lede">How a change goes from an editor to this website, and how the pieces talk to each other when you run
+      the project on your own computer.</p>
+  </header>
+
+  <section class="section" aria-labelledby="cicd-h">
+    <h2 id="cicd-h">Continuous integration and deployment</h2>
+    <div class="panel">
+      <svg class="chart flow" viewBox="0 0 960 150" role="img" aria-labelledby="cicd-t">
+        <title id="cicd-t">Code, then git push, then GitHub Actions CI, then CD build, then GitHub Pages</title>
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" class="arrowhead" />
+          </marker>
+        </defs>
+        @for (s of cicd; track s.title; let last = $last) {
+          <rect [attr.x]="s.x" y="30" width="170" height="84" rx="12" class="node" />
+          <text [attr.x]="s.x + 85" y="66" text-anchor="middle" class="node-title">{{ s.title }}</text>
+          <text [attr.x]="s.x + 85" y="90" text-anchor="middle" class="node-sub">{{ s.sub }}</text>
+          @if (!last) { <line [attr.x1]="s.x + 172" y1="72" [attr.x2]="s.x + 188" y2="72" class="edge" marker-end="url(#arr)" /> }
+        }
+      </svg>
+    </div>
+    <div class="grid two steps">
+      <div class="panel">
+        <h3><code>.github/workflows/ci.yml</code></h3>
+        <p>On every push and pull request to <code>main</code>: installs the pinned Python requirements and runs
+          <code>pytest backend/tests</code>, then runs <code>npm ci</code> and <code>npm run build</code> for the Angular app.
+          A red check blocks confidence in the change.</p>
+      </div>
+      <div class="panel">
+        <h3><code>.github/workflows/pages.yml</code></h3>
+        <p>On every push to <code>main</code>: builds the production bundle with
+          <code>--base-href /&lt;repo-name&gt;/</code> and deploys <code>dist/frontend/browser</code> to GitHub Pages.
+          Hash routing (<code>#/results</code>) means deep links never hit a missing server route.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="arch-h">
+    <h2 id="arch-h">System architecture (local run)</h2>
+    <div class="panel">
+      <svg class="chart flow" viewBox="0 0 960 150" role="img" aria-labelledby="arch-t">
+        <title id="arch-t">Angular site calls /api, the dev-server proxy forwards to Flask, Flask loads the model bundle</title>
+        @for (s of arch; track s.title; let last = $last) {
+          <rect [attr.x]="s.x" y="30" width="215" height="84" rx="12" class="node" [class.model]="last" />
+          <text [attr.x]="s.x + 107" y="66" text-anchor="middle" class="node-title">{{ s.title }}</text>
+          <text [attr.x]="s.x + 107" y="90" text-anchor="middle" class="node-sub">{{ s.sub }}</text>
+          @if (!last) { <line [attr.x1]="s.x + 217" y1="72" [attr.x2]="s.x + 233" y2="72" class="edge" marker-end="url(#arr)" /> }
+        }
+        <text x="480" y="140" text-anchor="middle" class="node-sub">JSON in: 11 numeric fields (null allowed) &middot; JSON out: prediction, probabilities, disclaimer</text>
+      </svg>
+    </div>
+    <div class="grid three steps">
+      <div class="panel"><h3>1. Start the API</h3><p><code>python backend\app.py</code> serves on <code>127.0.0.1:5000</code>.</p></div>
+      <div class="panel"><h3>2. Start the site</h3><p><code>ng serve --proxy-config proxy.conf.json</code> forwards <code>/api</code> to Flask.</p></div>
+      <div class="panel"><h3>3. Classify</h3><p>Open <code>localhost:4200/#/classifier</code>; blank fields are imputed with training medians.</p></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="res-h">
+    <h2 id="res-h">Research scripts</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Script</th><th scope="col">Produces</th></tr></thead>
+        <tbody>
+          <tr><td><code>research/replicate_base_paper.py</code></td><td><code>research/results/replication.json</code>: the base paper re-run</td></tr>
+          <tr><td><code>research/prioritise_candidates.py</code></td><td><code>prioritisation.json</code> and <code>public/data/candidates.json</code>: scores, ESS, Pareto, NASA check</td></tr>
+          <tr><td><code>research/make_examples.py</code></td><td><code>public/data/examples.json</code>: precomputed predictions for this site</td></tr>
+          <tr><td><code>research/build_results.py</code></td><td><code>public/data/results.json</code>: everything the Results page draws</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

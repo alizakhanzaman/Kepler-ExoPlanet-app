@@ -1,0 +1,11 @@
+.toc ul { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.toc a { font-size: .92rem; }
+h2[tabindex] { scroll-margin-top: calc(var(--nav-h) + 20px); outline: none; }
+.refs { display: grid; gap: 12px; }
+.cite { margin: 0 0 6px; }
+.cite em { color: #fff; font-style: italic; }
+.cite a { word-break: break-all; }
+.ann { margin: 0; color: var(--soft); font-size: .92rem; }
+.aspect { font-weight: 650; color: #fff; white-space: nowrap; }
+.ours { color: var(--planet); }
+.note-esi { margin-top: 20px; }

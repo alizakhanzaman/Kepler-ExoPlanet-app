@@ -1,0 +1,38 @@
+.ci { color: var(--muted); font-size: .82em; margin-left: 6px; white-space: nowrap; }
+.chart .sub { fill: var(--muted); font-size: 11px; }
+.chart .cell { fill: #fff; font-weight: 700; font-size: 13px; }
+.chart .cell.dark { fill: #1a0b33; }
+.chart .big { fill: #fff; font-family: var(--serif); font-size: 30px; font-weight: 700; }
+.chart .small { fill: #f3efff; font-size: 12px; }
+.chart .mark { stroke: rgba(255, 255, 255, .5); stroke-dasharray: 3 4; }
+.chart .marklabel { fill: var(--ink); font-size: 11px; }
+.l-prec, .l-rec, .l-f1, .l-paper, .l-ours { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.l-prec { stroke: var(--planet); }
+.l-rec { stroke: var(--fp); }
+.l-f1 { stroke: var(--gold); stroke-dasharray: 6 4; }
+.l-paper { stroke: var(--gold); }
+.l-ours { stroke: var(--planet); }
+.p-paper { fill: var(--gold); }
+.p-ours { fill: var(--planet); }
+.k-prec, .k-ours { background: var(--planet); }
+.k-rec { background: var(--fp); }
+.k-f1, .k-paper { background: var(--gold); }
+
+.bars { display: grid; gap: 10px; margin-top: 8px; }
+.bars li { display: grid; grid-template-columns: 150px minmax(0, 1fr) 56px; gap: 12px; align-items: center; }
+.bars.wide li { grid-template-columns: 260px minmax(0, 1fr) 64px; }
+.bl { font-size: .9rem; }
+.bl code { font-size: .78rem; color: var(--muted); background: none; }
+.track { height: 14px; background: rgba(167, 139, 250, .14); border-radius: 7px; overflow: hidden; }
+.bar { display: block; height: 100%; background: linear-gradient(90deg, var(--violet), var(--magenta)); border-radius: 7px; }
+.bar.gold { background: linear-gradient(90deg, var(--magenta), var(--gold)); }
+.bv { text-align: right; font-variant-numeric: tabular-nums; color: #fff; }
+.sweep { margin-top: 22px; }
+.amb { margin-top: 22px; }
+.amb ul { margin: 8px 0; padding-left: 20px; }
+.amb p { margin: 0; color: var(--soft); font-size: .9rem; }
+.gen { margin-top: 32px; }
+@media (max-width: 680px) {
+  .bars li, .bars.wide li { grid-template-columns: 1fr 52px; }
+  .bars .track { grid-column: 1 / -1; grid-row: 2; }
+}
